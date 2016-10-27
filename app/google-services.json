@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "139594444576",
+    "project_id": "linkup-144707"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:139594444576:android:b4cec257fdef3b41",
+        "android_client_info": {
+          "package_name": "set2.linkup"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "139594444576-kq0g6ic2hbll8pfqab0q607iimlrn1vk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "set2.linkup",
+            "certificate_hash": "B514292697D2DCFA136482E6580A94E958E68170"
+          }
+        },
+        {
+          "client_id": "139594444576-rm0udfba22mfjkjoma5hd32sv9hihv9q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAijV_FzLqZEm06P4hBToiFSmrJi5LdVi8"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
