@@ -1,7 +1,9 @@
 {
   "project_info": {
     "project_number": "139594444576",
-    "project_id": "linkup-144707"
+    "firebase_url": "https://linkup-144707.firebaseio.com",
+    "project_id": "linkup-144707",
+    "storage_bucket": "linkup-144707.appspot.com"
   },
   "client": [
     {
@@ -35,11 +37,16 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "139594444576-rm0udfba22mfjkjoma5hd32sv9hihv9q.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
-          "status": 1
+          "status": 2
         }
       }
     }
