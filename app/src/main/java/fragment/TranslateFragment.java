@@ -12,21 +12,15 @@ import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
 
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import bean.TranslateBean;
 import cn.finalteam.okhttpfinal.BaseHttpRequestCallback;
-import cn.finalteam.okhttpfinal.StringHttpRequestCallback;
-import http.Constant;
-import http.HttpUtil;
+import connect.HttpUtil;
 import okhttp3.Headers;
 import okhttp3.Response;
-import service.LinkupApplication;
 import set2.linkup.R;
-import util.UserUtil;
 
 /**
  * Name: TranslateFragment

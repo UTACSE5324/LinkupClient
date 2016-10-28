@@ -1,5 +1,7 @@
 package bean;
 
+import java.io.Serializable;
+
 /**
  * Name: UserBean
  * Description: Bean for the user information
@@ -7,7 +9,7 @@ package bean;
  * Created on 2016/10/2 0002.
  */
 
-public class UserBean {
+public class UserBean implements Serializable{
 
     String username;
     String email;

@@ -1,6 +1,7 @@
 package fragment;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -8,8 +9,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.List;
+
 import adapter.ChatRecyclerViewAdapter;
 import adapter.FriendRecyclerViewAdapter;
+import bean.UserBean;
+import connect.XmppUtil;
 import set2.linkup.R;
 
 /**
@@ -20,9 +25,27 @@ import set2.linkup.R;
 
 public class FriendsFragment extends Fragment {
     private static final String ARG_SECTION = "Friends";
+    private static final int FRIENDS = 1;
 
     private RecyclerView recyclerView;
     private FriendRecyclerViewAdapter friendRecyclerViewAdapter;
+
+    private List<UserBean> friendsList;
+
+
+    private Handler handler = new Handler() {
+        public void handleMessage(android.os.Message msg) {
+            switch(msg.what){
+                case FRIENDS:
+                    System.out.println(">>>>>>"+msg.arg1);
+                    if(msg.arg1==1){
+                        friendsList = (List<UserBean>)msg.obj;
+                        friendRecyclerViewAdapter.setUserList(friendsList);
+                        friendRecyclerViewAdapter.notifyDataSetChanged();
+                    }
+                    break;
+            }
+        }};
 
     public static FriendsFragment newInstance(){
         FriendsFragment fragment = new FriendsFragment();
@@ -45,6 +68,12 @@ public class FriendsFragment extends Fragment {
         friendRecyclerViewAdapter = new FriendRecyclerViewAdapter(getContext());
         recyclerView.setAdapter(friendRecyclerViewAdapter);
 
+        initData();
+
         return rootView;
+    }
+
+    public void initData(){
+        XmppUtil.getInstance().searchUsers(handler,FRIENDS,"a");
     }
 }

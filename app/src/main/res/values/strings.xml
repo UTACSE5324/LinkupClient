@@ -9,4 +9,11 @@
 
     <string name="pick_account">Please pick an account.</string>
     <string name="not_online">Device is not online.</string>
+
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="confirm">Confirm</string>
+    <string name="register">Register</string>
+    <string name="login">Login</string>
+    <string name="submit">Submit</string>
 </resources>

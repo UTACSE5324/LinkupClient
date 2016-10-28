@@ -3,32 +3,96 @@
               xmlns:app="http://schemas.android.com/apk/res-auto"
               android:id="@+id/root_view"
               android:orientation="vertical"
+              android:fitsSystemWindows="true"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
-    <ImageView
-        android:layout_centerHorizontal="true"
-        android:src="@mipmap/logo"
-        android:layout_gravity="center"
-        android:layout_marginTop="160dp"
-        android:layout_width="160dp"
-        android:layout_height="wrap_content"/>
-
-    <TextView
-        android:id="@+id/process"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:textColor="@color/colorTextSecond"
-        android:layout_marginBottom="100dp"
-        android:layout_marginRight="16dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-    <com.google.android.gms.common.SignInButton
-        android:layout_alignParentBottom="true"
-        android:id="@+id/sign_in_button"
-        android:textAlignment="center"
+    <LinearLayout
+        android:background="@color/colorPrimary"
+        android:id="@+id/head_part"
         android:padding="16dp"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_width="78dp"
+            android:layout_height="78dp"
+            android:layout_margin="16dp"
+            android:layout_gravity="center"
+            android:src="@mipmap/ic_launcher"/>
+
+        <TextView
+            android:id="@+id/type"
+            android:textSize="26sp"
+            android:textColor="@color/white"
+            android:text="@string/login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/edit_part"
+        android:layout_below="@id/head_part"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.rengwuxian.materialedittext.MaterialEditText
+            android:id="@+id/username"
+            android:textSize="18sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:hint="@string/username"
+            app:met_floatingLabel="highlight"
+            app:met_floatingLabelText="@string/username"/>
+
+        <com.rengwuxian.materialedittext.MaterialEditText
+            android:id="@+id/password"
+            android:textSize="18sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:hint="@string/password"
+            app:met_floatingLabel="highlight"
+            app:met_floatingLabelText="@string/password"/>
+
+        <com.rengwuxian.materialedittext.MaterialEditText
+            android:visibility="invisible"
+            android:id="@+id/confirm"
+            android:textSize="18sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:hint="@string/confirm"
+            app:met_floatingLabel="highlight"
+            app:met_floatingLabelText="@string/confirm"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/edit_part"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/btn_type"
+            android:textColor="@color/colorTextSecond"
+            android:textSize="22sp"
+            android:layout_margin="20dp"
+            android:text="@string/register"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/btn_submit"
+            android:textColor="@color/colorPrimary"
+            android:textSize="22sp"
+            android:layout_margin="20dp"
+            android:text="@string/submit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 </RelativeLayout>

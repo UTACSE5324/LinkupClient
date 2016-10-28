@@ -1,31 +1,19 @@
 package set2.linkup;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.widget.TextViewCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.KeyEvent;
+
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.SignInButton;
-import com.google.android.gms.common.api.GoogleApiClient;
+import com.rengwuxian.materialedittext.MaterialEditText;
 
-import org.w3c.dom.Text;
-
-import bean.UserBean;
+import connect.XmppUtil;
 import service.LinkupApplication;
 import util.UserUtil;
 
@@ -36,29 +24,59 @@ import util.UserUtil;
  */
 
 public class LoginActivity extends FragmentActivity implements View.OnClickListener{
-    public static int RC_SIGN_IN = 0;
-
-    private TextView process;
+    private final int LOGIN = 1;
+    private final int REGISTER = 2;
 
     private Context context;
-    private Intent signInIntent;
 
-    private GoogleApiClient apiClient;
-    private SignInButton signInButton;
-    
+    private boolean login;
+
+    private TextView typeText,typeButton,submitButton;
+    private MaterialEditText username,password,confirm;
+
+    private Handler handler = new Handler() {
+        public void handleMessage(android.os.Message msg) {
+           switch(msg.what){
+               case LOGIN:
+                   if(msg.arg1==1) {
+                       Toast.makeText(context, "Login success", Toast.LENGTH_SHORT);
+
+                       Intent intent = new Intent(context, MainActivity.class);
+                       startActivity(intent);
+                       finishAct();
+                   }
+                   if(msg.arg1==-1)
+                       Toast.makeText(context,"Login fail",Toast.LENGTH_SHORT);
+                   break;
+               case REGISTER:
+                   if(msg.arg1==0)
+                       Toast.makeText(context,"No result",Toast.LENGTH_SHORT);
+                   if(msg.arg1==1)
+                       Toast.makeText(context,"Register success",Toast.LENGTH_SHORT);
+                   if(msg.arg1==2)
+                       Toast.makeText(context,"Name exists",Toast.LENGTH_SHORT);
+                   if(msg.arg1==3)
+                       Toast.makeText(context,"Login fail",Toast.LENGTH_SHORT);
+                   if(msg.arg1==-1)
+                       Toast.makeText(context,"Connect fail",Toast.LENGTH_SHORT);
+                   break;
+           }
+        }
+    };
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
         context = LoginActivity.this;
-        apiClient = LinkupApplication.apiClient;
+        login = true;
 
         /*
         * judge if the user has signed in
         * */
         if(LinkupApplication.getStringPref(UserUtil.UNAME).equals("")){
-            //use google API to sign in
             initViews();
         }else{
             // enter the main page
@@ -69,53 +87,52 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
     }
 
     public void initViews(){
-        process = (TextView) findViewById(R.id.process);
 
-        signInButton = (SignInButton) findViewById(R.id.sign_in_button);
-        signInButton.setOnClickListener(this);
+        typeText = (TextView) findViewById(R.id.type);
+        typeButton = (TextView) findViewById(R.id.btn_type);
+        submitButton = (TextView) findViewById(R.id.btn_submit);
+
+        username = (MaterialEditText) findViewById(R.id.username);
+        password = (MaterialEditText) findViewById(R.id.password);
+        confirm = (MaterialEditText) findViewById(R.id.confirm);
+
+        typeButton.setOnClickListener(this);
+        submitButton.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View view) {
 
-        switch(view.getId()){
-            case R.id.sign_in_button:
-                signInIntent = Auth.GoogleSignInApi.getSignInIntent(apiClient);
-                startActivityForResult(signInIntent, RC_SIGN_IN);
+        switch (view.getId()){
+            case R.id.btn_type:
+
+                if(login){
+                    login = false;
+                    typeText.setText("Register");
+                    confirm.setVisibility(View.VISIBLE);
+                    typeButton.setText("Login");
+                }else{
+                    login = true;
+                    typeText.setText("Login");
+                    confirm.setVisibility(View.INVISIBLE);
+                    typeButton.setText("Register");
+                }
+                break;
+            case R.id.btn_submit:
+                String uname = username.getText().toString();
+                String pword = password.getText().toString();
+
+                if(login)
+                    XmppUtil.getInstance().login(handler, LOGIN, uname, pword);
+                else if(confirm.getText().toString().equals(pword)){
+                    XmppUtil.getInstance().register(handler, LOGIN, uname, pword);
+                }
                 break;
         }
     }
 
-    /*handle the result from google login activity*/
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-            super.onActivityResult(requestCode, resultCode, data);
-            process.setText("sign in successfully");
-            // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
-            if (requestCode == RC_SIGN_IN) {
-                GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-
-                try {
-                    process.setText("getting account information\n"+process.getText());
-                    GoogleSignInAccount acct = result.getSignInAccount();
-                    UserBean bean = new UserBean();
-                    bean.setUsername(acct.getDisplayName());
-                    bean.setEmail(acct.getEmail());
-                    bean.setId(acct.getId());
-                    bean.setToken(acct.getIdToken());
-
-                    if(acct.getPhotoUrl()!=null)
-                        bean.setAvatar(acct.getPhotoUrl().toString());
-
-                    UserUtil.saveUserInfo(bean);
-                }catch(Exception e){
-
-                }
-
-                Intent intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
-
-                finish();
-            }
+    public void finishAct(){
+        this.finish();
     }
+
 }

@@ -2,6 +2,7 @@ package set2.linkup;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,7 +15,11 @@ import android.widget.ImageView;
 
 import com.alibaba.fastjson.JSON;
 
-import java.security.Timestamp;
+import org.jivesoftware.smack.Chat;
+import org.jivesoftware.smack.ChatManager;
+import org.jivesoftware.smack.MessageListener;
+import org.jivesoftware.smack.packet.Message;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,11 +27,10 @@ import adapter.MessageRecyclerViewAdapter;
 import bean.MessageBean;
 import bean.TranslateBean;
 import cn.finalteam.okhttpfinal.BaseHttpRequestCallback;
-import http.HttpUtil;
+import connect.HttpUtil;
+import connect.XmppUtil;
 import okhttp3.Headers;
 import okhttp3.Response;
-
-import static set2.linkup.R.id.toolbar;
 
 /**
  * Name: MessageActivity
@@ -35,6 +39,7 @@ import static set2.linkup.R.id.toolbar;
  */
 
 public class MessageActivity extends AppCompatActivity {
+    private final static int SENDMSG = 1;
 
     private Toolbar toolbar;
     private RecyclerView recyclerView;
@@ -49,6 +54,10 @@ public class MessageActivity extends AppCompatActivity {
     private MessageRecyclerViewAdapter adapter;
 
     private boolean showTranslate;
+
+    private String uName;
+    private Chat newChat;
+
 
     private BaseHttpRequestCallback callback = new BaseHttpRequestCallback(){
         @Override
@@ -70,19 +79,32 @@ public class MessageActivity extends AppCompatActivity {
             }catch (Exception e){}
         }};
 
+    private Handler handler = new Handler() {
+        public void handleMessage(android.os.Message msg) {
+            adapter.notifyItemRangeInserted(msgList.size(),1);
+            recyclerView.scrollToPosition(recyclerView.getChildCount());
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_message);
 
-        String uName = getIntent().getStringExtra("uname");
-
-        showTranslate = false;
-
+        uName = getIntent().getStringExtra("uname");
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(uName);
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.mipmap.back);
+
+        showTranslate = false;
+
+        initViews();
+        initData();
+
+    }
+
+    public void initViews(){
 
         progressDialog = new ProgressDialog(this);
 
@@ -107,26 +129,41 @@ public class MessageActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
                         if(etReply.getText().length()>0){
-                            MessageBean bean = new MessageBean();
-                            bean.setPrimary(true);
-                            bean.setMessage(etReply.getText().toString());
-                            bean.setDateline(System.currentTimeMillis());
-                            msgList.add(bean);
+                            try {
+                                newChat.sendMessage(etReply.getText().toString());
+                                MessageBean bean = new MessageBean();
+                                bean.setPrimary(true);
+                                bean.setMessage(etReply.getText().toString());
+                                bean.setDateline(System.currentTimeMillis());
+                                msgList.add(bean);
 
-                            MessageBean bean2 = new MessageBean();
-                            bean2.setPrimary(false);
-                            bean2.setMessage("Received your message.");
-                            bean2.setDateline(System.currentTimeMillis());
-                            msgList.add(bean2);
+                                etReply.setText("");
 
-                            etReply.setText("");
+                                handler.sendEmptyMessage(0);
 
-                            adapter.notifyItemRangeInserted(msgList.size(),2);
-                            recyclerView.scrollToPosition(recyclerView.getChildCount());
+                            }catch(Exception e){}
                         }
                     }
                 }
         );
+    }
+
+    public void initData(){
+        ChatManager chatmanager = XmppUtil.getInstance().getConnection().getChatManager();
+        newChat = chatmanager.createChat(uName + "@linkupserver/Smack" , new MessageListener() {
+            public void processMessage(Chat chat, Message message){
+                        if (message.getBody() != null) {
+
+                            MessageBean bean = new MessageBean();
+                            bean.setPrimary(false);
+                            bean.setMessage(message.getBody());
+                            bean.setDateline(System.currentTimeMillis());
+                            msgList.add(bean);
+
+                            handler.sendEmptyMessage(0);
+                            }
+                    }  
+        });  
     }
 
     @Override
@@ -142,7 +179,7 @@ public class MessageActivity extends AppCompatActivity {
         switch(id){
             //back button
             case android.R.id.home:
-                finish();
+                this.finish();
                 break;
             //translate message button
             case R.id.action_translate:

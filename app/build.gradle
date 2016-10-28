@@ -51,5 +51,7 @@ dependencies {
     compile 'com.afollestad.material-dialogs:core:0.9.0.2'
     //MaterialEditText
     compile 'com.rengwuxian.materialedittext:library:2.1.4'
+    //XMPP asmack
+    compile files('libs/asmack-android-18-0.8.9.jar')
 }
 apply plugin: 'com.google.gms.google-services'

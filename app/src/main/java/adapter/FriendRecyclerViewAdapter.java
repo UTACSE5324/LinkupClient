@@ -10,6 +10,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import bean.UserBean;
 import set2.linkup.MessageActivity;
 import set2.linkup.R;
 
@@ -22,13 +26,20 @@ import set2.linkup.R;
 public class FriendRecyclerViewAdapter extends RecyclerView.Adapter{
     private Context context;
 
+    private List<UserBean> userList;
+
     public FriendRecyclerViewAdapter(Context context){
         this.context = context;
+        this.userList = new ArrayList<>();
+    }
+
+    public void setUserList(List<UserBean> userList){
+        this.userList = userList;
     }
 
     @Override
     public int getItemCount(){
-        return 10;
+        return userList.size();
     }
 
     @Override
@@ -48,11 +59,15 @@ public class FriendRecyclerViewAdapter extends RecyclerView.Adapter{
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i){
         ItemViewHolder itemViewHolder = (ItemViewHolder) viewHolder;
 
-        itemViewHolder.uname = "User" + i;
+        String uname = userList.get(i).getUsername();
+        String email = userList.get(i).getEmail();
+
+        itemViewHolder.uname = uname;
 
         itemViewHolder.avatar.setImageResource(R.mipmap.ic_account_circle_black_48dp);
-        itemViewHolder.tvTitle.setText("User "+i);
-        itemViewHolder.tvContent.setText("Information of User "+i);
+
+        itemViewHolder.tvTitle.setText(uname);
+        itemViewHolder.tvContent.setText(email);
     }
 
     class ItemViewHolder extends RecyclerView.ViewHolder{
