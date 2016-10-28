@@ -2,10 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="set2.linkup">
 
+    <uses-sdk android:minSdkVersion="15" android:targetSdkVersion="25"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <!--网络访问权限-->
     <uses-permission android:name="android.permission.INTERNET" />
     <!--  获取网络状态 -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <permission android:name="set2.linkup.permission.C2D_MESSAGE" android:protectionLevel="signature" />
+    <uses-permission android:name="set2.linkup.permission.C2D_MESSAGE" />
 
     <application
         android:name="service.LinkupApplication"
@@ -14,6 +20,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity
             android:name=".LoginActivity"
             android:label="@string/app_name"
