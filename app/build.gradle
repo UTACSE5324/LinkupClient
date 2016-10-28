@@ -1,8 +1,7 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.google.gms.google-services'
 
 android {
-    compileSdkVersion 24
+    compileSdkVersion 25
     buildToolsVersion "23.0.3"
 
     configurations.all {
@@ -12,7 +11,7 @@ android {
     defaultConfig {
         applicationId "set2.linkup"
         minSdkVersion 15
-        targetSdkVersion 24
+        targetSdkVersion 25
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -40,12 +39,14 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:24.2.1'
-    compile 'com.android.support:design:24.2.1'
+    compile 'com.android.support:appcompat-v7:25.0.0'
+    compile 'com.android.support:design:25.0.0'
     //Fast Json
     compile files('libs/fastjson-1.1.46.android.jar')
     //Google Login
-    compile 'com.google.android.gms:play-services-auth:9.0.0'
+    compile 'com.google.android.gms:play-services-auth:9.8.0'
+    //Google GCM
+    compile "com.google.android.gms:play-services-gcm:9.8.0"
     //Picasso
     compile 'com.squareup.picasso:picasso:2.5.2'
     //MaterialDialog
@@ -53,3 +54,4 @@ dependencies {
     //MaterialEditText
     compile 'com.rengwuxian.materialedittext:library:2.1.4'
 }
+apply plugin: 'com.google.gms.google-services'
