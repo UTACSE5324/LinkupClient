@@ -59,7 +59,7 @@ import static org.jivesoftware.smackx.workgroup.packet.RoomTransfer.Type.user;
  */
 
 public class XmppUtil {
-    private static final String HOST = "192.168.0.102";
+    private static final String HOST = "192.168.0.100";
     private static final int PORT = 5222;
     private static final String SERVER_NAME = "linkupserver";
     private static XmppUtil instance;
