@@ -39,6 +39,7 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
 
     private boolean login;
 
+
     private TextView typeText,typeButton,submitButton;
     private MaterialEditText username,password,confirm;
 
