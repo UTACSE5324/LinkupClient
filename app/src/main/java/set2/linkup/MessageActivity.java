@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 
@@ -31,6 +32,8 @@ import connect.HttpUtil;
 import connect.XmppUtil;
 import okhttp3.Headers;
 import okhttp3.Response;
+
+import static service.LinkupApplication.context;
 
 /**
  * Name: MessageActivity
@@ -74,6 +77,8 @@ public class MessageActivity extends AppCompatActivity {
                     adapter.reverseTranslate();
                     adapter.notifyDataSetChanged();
                 }
+
+                Toast.makeText(context,"Messages have been translated",Toast.LENGTH_SHORT).show();
 
                 progressDialog.dismiss();
             }catch (Exception e){}

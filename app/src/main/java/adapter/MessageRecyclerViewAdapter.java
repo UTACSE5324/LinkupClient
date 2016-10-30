@@ -13,9 +13,11 @@ import android.widget.TextView;
 import java.util.List;
 
 import bean.MessageBean;
+import service.LinkupApplication;
 import set2.linkup.MessageActivity;
 import set2.linkup.R;
 import util.DateUtil;
+import util.UserUtil;
 
 /**
  * Name: MessageRecyclerViewAdapter
@@ -86,7 +88,11 @@ public class MessageRecyclerViewAdapter extends RecyclerView.Adapter{
 
         itemViewHolder.avatar.setImageResource(R.mipmap.ic_account_circle_black_48dp);
 
-        itemViewHolder.tvDate.setText(DateUtil.getDateNormal(msgList.get(i).getDateline()));
+        if(showTranslate)
+        itemViewHolder.tvDate.setText("translated "
+                +DateUtil.getDateNormal(msgList.get(i).getDateline()));
+        else
+            itemViewHolder.tvDate.setText(DateUtil.getDateNormal(msgList.get(i).getDateline()));
 
         if(showTranslate && msgList.get(i).getTranslate()!=null){
             itemViewHolder.tvMessage.setText(msgList.get(i).getTranslate());
