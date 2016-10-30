@@ -1,5 +1,6 @@
 package set2.linkup;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,6 +14,13 @@ import android.widget.Toast;
 
 import com.rengwuxian.materialedittext.MaterialEditText;
 
+import org.jivesoftware.smack.XMPPConnection;
+
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
+import bean.UserBean;
 import connect.XmppUtil;
 import service.LinkupApplication;
 import util.UserUtil;
@@ -34,33 +42,49 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
     private TextView typeText,typeButton,submitButton;
     private MaterialEditText username,password,confirm;
 
+    private ProgressDialog dialog;
+
     private Handler handler = new Handler() {
         public void handleMessage(android.os.Message msg) {
            switch(msg.what){
                case LOGIN:
                    if(msg.arg1==1) {
-                       Toast.makeText(context, "Login success", Toast.LENGTH_SHORT);
+                       Toast.makeText(context, "Login success", Toast.LENGTH_SHORT).show();
+
+                       XMPPConnection conn = XmppUtil.getInstance().getConnection();
+
+                       UserBean bean = new UserBean();
+                       bean.setUsername(conn.getAccountManager().getAccountAttribute("name"));
+                       bean.setEmail(conn.getAccountManager().getAccountAttribute("email"));
+
+                       if(password!=null&&password.getText().toString().length()>0)
+                           bean.setPassword(password.getText().toString());
+
+                       bean.setLanguage("hi");
+
+                       UserUtil.saveUserInfo(bean);
 
                        Intent intent = new Intent(context, MainActivity.class);
                        startActivity(intent);
                        finishAct();
                    }
                    if(msg.arg1==-1)
-                       Toast.makeText(context,"Login fail",Toast.LENGTH_SHORT);
+                       Toast.makeText(context,"Login fail",Toast.LENGTH_SHORT).show();
                    break;
                case REGISTER:
                    if(msg.arg1==0)
-                       Toast.makeText(context,"No result",Toast.LENGTH_SHORT);
+                       Toast.makeText(context,"No result",Toast.LENGTH_SHORT).show();
                    if(msg.arg1==1)
-                       Toast.makeText(context,"Register success",Toast.LENGTH_SHORT);
+                       Toast.makeText(context,"Register success",Toast.LENGTH_SHORT).show();
                    if(msg.arg1==2)
-                       Toast.makeText(context,"Name exists",Toast.LENGTH_SHORT);
+                       Toast.makeText(context,"Name exists",Toast.LENGTH_SHORT).show();
                    if(msg.arg1==3)
-                       Toast.makeText(context,"Login fail",Toast.LENGTH_SHORT);
+                       Toast.makeText(context,"Login fail",Toast.LENGTH_SHORT).show();
                    if(msg.arg1==-1)
-                       Toast.makeText(context,"Connect fail",Toast.LENGTH_SHORT);
+                       Toast.makeText(context,"Connect fail",Toast.LENGTH_SHORT).show();
                    break;
            }
+            dialog.dismiss();
         }
     };
 
@@ -73,16 +97,20 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
         context = LoginActivity.this;
         login = true;
 
+        dialog = new ProgressDialog(this);
+        dialog.setMessage("Loading");
+
         /*
         * judge if the user has signed in
         * */
         if(LinkupApplication.getStringPref(UserUtil.UNAME).equals("")){
             initViews();
         }else{
-            // enter the main page
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-            finish();
+            dialog.show();
+            XmppUtil.getInstance().login(
+                    handler, LOGIN, LinkupApplication.getStringPref(UserUtil.UNAME),
+                    LinkupApplication.getStringPref(UserUtil.PASSWORD)
+            );
         }
     }
 
@@ -122,6 +150,7 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
                 String uname = username.getText().toString();
                 String pword = password.getText().toString();
 
+                dialog.show();
                 if(login)
                     XmppUtil.getInstance().login(handler, LOGIN, uname, pword);
                 else if(confirm.getText().toString().equals(pword)){

@@ -1,9 +1,13 @@
 package connect;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.widget.ImageView;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.PacketCollector;
@@ -17,6 +21,7 @@ import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Registration;
 import org.jivesoftware.smack.provider.PrivacyProvider;
 import org.jivesoftware.smack.provider.ProviderManager;
+import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.Form;
 import org.jivesoftware.smackx.GroupChatInvitation;
 import org.jivesoftware.smackx.PrivateDataManager;
@@ -27,6 +32,7 @@ import org.jivesoftware.smackx.packet.LastActivity;
 import org.jivesoftware.smackx.packet.OfflineMessageInfo;
 import org.jivesoftware.smackx.packet.OfflineMessageRequest;
 import org.jivesoftware.smackx.packet.SharedGroupsInfo;
+import org.jivesoftware.smackx.packet.VCard;
 import org.jivesoftware.smackx.provider.AdHocCommandDataProvider;
 import org.jivesoftware.smackx.provider.DataFormProvider;
 import org.jivesoftware.smackx.provider.DelayInformationProvider;
@@ -44,11 +50,14 @@ import org.jivesoftware.smackx.provider.XHTMLExtensionProvider;
 import org.jivesoftware.smackx.search.UserSearch;
 import org.jivesoftware.smackx.search.UserSearchManager;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import bean.UserBean;
+import util.FileUtil;
 
 import static android.R.attr.data;
 import static org.jivesoftware.smackx.filetransfer.FileTransfer.Error.connection;
@@ -73,15 +82,15 @@ public class XmppUtil {
         return instance;
     }
 
-    public XMPPConnection getConnection(){
+    public XMPPConnection getConnection() {
         return conn;
     }
 
-    public void searchUsers(final Handler handler, final int what, final String key){
+    public void searchUsers(final Handler handler, final int what, final String key) {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if(conn == null||!conn.isConnected())
+                if (conn == null || !conn.isConnected())
                     initConnection();
                 Message msg = new Message();
                 msg.what = what;
@@ -89,22 +98,22 @@ public class XmppUtil {
                 try {
                     if (conn.isConnected()) {
 
-                        List<UserBean> results=new ArrayList<>();
+                        List<UserBean> results = new ArrayList<>();
 
-                        UserSearchManager usm=new UserSearchManager(conn);
-                        Form searchForm=usm.getSearchForm("search."+conn.getServiceName());
-                        Form answerForm=searchForm.createAnswerForm();
-                        answerForm.setAnswer("Email",true);
-                        answerForm.setAnswer("search",key);
+                        UserSearchManager usm = new UserSearchManager(conn);
+                        Form searchForm = usm.getSearchForm("search." + conn.getServiceName());
+                        Form answerForm = searchForm.createAnswerForm();
+                        answerForm.setAnswer("Email", true);
+                        answerForm.setAnswer("search", key);
 
-                        ReportedData data=usm.getSearchResults(answerForm,"search."+conn.getServiceName());
-                        Iterator<ReportedData.Row>it=data.getRows();
-                        ReportedData.Row row=null;
-                        UserBean user=null;
+                        ReportedData data = usm.getSearchResults(answerForm, "search." + conn.getServiceName());
+                        Iterator<ReportedData.Row> it = data.getRows();
+                        ReportedData.Row row = null;
+                        UserBean user = null;
 
-                        while(it.hasNext()){
-                            user=new UserBean();
-                            row=it.next();
+                        while (it.hasNext()) {
+                            user = new UserBean();
+                            row = it.next();
                             user.setUsername(row.getValues("Username").next().toString());
                             user.setEmail(row.getValues("Email").next().toString());
 
@@ -113,10 +122,10 @@ public class XmppUtil {
 
                         msg.obj = results;
                         msg.arg1 = 1;
-                    }else
+                    } else
                         msg.arg1 = -1;
 
-                }catch(Exception e){
+                } catch (Exception e) {
                     msg.arg1 = -1;
                 }
 
@@ -126,35 +135,35 @@ public class XmppUtil {
     }
 
     public void login(final Handler handler, final int what, final String uname, final String pword) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    if(conn == null||!conn.isConnected())
-                        initConnection();
-                    Message msg = new Message();
-                    msg.what = what;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (conn == null || !conn.isConnected())
+                    initConnection();
+                Message msg = new Message();
+                msg.what = what;
 
-                    try {
-                        if (conn.isConnected()) {
-                            conn.login(uname, pword);
-                            msg.arg1 = 1;
-                        }else
-                            msg.arg1 = -1;
+                try {
+                    if (conn.isConnected()) {
+                        conn.login(uname, pword);
+                        msg.arg1 = 1;
+                    } else
+                        msg.arg1 = -1;
 
-                    }catch(Exception e){
-                            msg.arg1 = -1;
-                    }
-
-                    handler.sendMessage(msg);
+                } catch (Exception e) {
+                    msg.arg1 = -1;
                 }
-            }).start();
+
+                handler.sendMessage(msg);
+            }
+        }).start();
     }
 
     public void register(final Handler handler, final int what, final String uname, final String pword) {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if(conn == null||!conn.isConnected())
+                if (conn == null || !conn.isConnected())
                     initConnection();
 
                 Message msg = new Message();
@@ -177,23 +186,20 @@ public class XmppUtil {
                         collector.cancel();
                         if (result == null) {
                             msg.arg1 = 0;
-                        }
-                        else if (result.getType() == IQ.Type.RESULT) {
+                        } else if (result.getType() == IQ.Type.RESULT) {
                             msg.arg1 = 1;
-                        }
-                        else {
+                        } else {
                             if (result.getError().toString().equalsIgnoreCase("conflict(409)")) {
                                 msg.arg1 = 2;
-                            }
-                            else {
+                            } else {
                                 msg.arg1 = 3;
                             }
                         }
 
-                    }else
+                    } else
                         msg.arg1 = -1;
 
-                }catch(Exception e){
+                } catch (Exception e) {
                     msg.arg1 = -1;
                 }
 
@@ -202,7 +208,68 @@ public class XmppUtil {
         }).start();
     }
 
-    public boolean initConnection(){
+    public void getAvatar(final ImageView view, final String user) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (conn == null || !conn.isConnected())
+                    initConnection();
+
+                ByteArrayInputStream bais = null;
+                try {
+                    VCard vcard = new VCard();
+
+                    ProviderManager.getInstance().addIQProvider("vCard", "vcard-temp",
+                            new org.jivesoftware.smackx.provider.VCardProvider());
+
+                    vcard.load(conn, user + "@" + conn.getServiceName());
+
+                    if (vcard.getAvatar() != null) {
+                        bais = new ByteArrayInputStream(vcard.getAvatar());
+                        Bitmap bitmap = BitmapFactory.decodeStream(bais);
+                        view.setImageBitmap(bitmap);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    private void setUserImage(final String path){
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    if (conn == null || !conn.isConnected())
+                        initConnection();
+
+                    VCard card = new VCard();
+                    card.load(conn);
+
+                    byte[] image = FileUtil.readTextFileToByte(new File(path));
+
+                    PacketFilter filter = new AndFilter(new PacketIDFilter(
+                            card.getPacketID()), new PacketTypeFilter(IQ.class));
+                    PacketCollector collector = conn
+                            .createPacketCollector(filter);
+                    String encodeImage = StringUtils.encodeBase64(image);
+                    card.setAvatar(image, encodeImage);
+
+                    card.setField("PHOTO", "<TYPE>image/jpg</TYPE><BINVAL>"
+                            + encodeImage + "</BINVAL>", true);
+
+                    card.save(conn);
+                    IQ iq = (IQ) collector.nextResult(SmackConfiguration
+                            .getPacketReplyTimeout());
+
+                } catch (Exception e) {
+
+                }
+            }
+        }.start();
+    }
+    public boolean initConnection() {
         boolean isConnect = false;
 
         ConnectionConfiguration config = new ConnectionConfiguration(HOST, PORT, SERVER_NAME);
@@ -221,8 +288,7 @@ public class XmppUtil {
             conn.connect();
 
             isConnect = true;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -235,8 +301,7 @@ public class XmppUtil {
         // Time
         try {
             pm.addIQProvider("query", "jabber:iq:time", Class.forName("org.jivesoftware.smackx.packet.Time"));
-        }
-        catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             Log.w("TestClient", "Can't load class for org.jivesoftware.smackx.packet.Time");
         }
         // Roster Exchange
@@ -270,8 +335,7 @@ public class XmppUtil {
         // Version
         try {
             pm.addIQProvider("query", "jabber:iq:version", Class.forName("org.jivesoftware.smackx.packet.Version"));
-        }
-        catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
         // VCard

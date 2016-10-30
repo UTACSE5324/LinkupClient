@@ -25,7 +25,7 @@ public class UserUtil {
             LinkupApplication.setStringPref(UNAME,bean.getUsername());
             LinkupApplication.setStringPref(EMAIL,bean.getEmail());
             LinkupApplication.setStringPref(PASSWORD,bean.getPassword());
-            LinkupApplication.setStringPref(LANGUAGE,"en");
+            LinkupApplication.setStringPref(LANGUAGE,bean.getLanguage());
         }else{
             //Clear Cache
             LinkupApplication.setStringPref(UID,null);

@@ -26,6 +26,7 @@ import com.google.android.gms.common.api.Status;
 import com.squareup.picasso.Picasso;
 
 import adapter.SectionsPagerAdapter;
+import connect.XmppUtil;
 import service.LinkupApplication;
 import util.UserUtil;
 import view.CircleImageView;
@@ -105,6 +106,9 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
+            if(XmppUtil.getInstance().getConnection().isConnected()){
+                XmppUtil.getInstance().getConnection().disconnect();
+            }
             super.onBackPressed();
         }
     }
@@ -152,6 +156,10 @@ public class MainActivity extends AppCompatActivity
                         .positiveText("Choose")
                         .show();
                 break;
+            case R.id.nav_account:
+                Intent intent = new Intent(this, SettingActivity.class);
+                startActivity(intent);
+                break;
             //Logout
             case R.id.nav_logout:
                 new MaterialDialog.Builder(this)
@@ -178,17 +186,14 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void signOut(){
-        GoogleApiClient apiClient = LinkupApplication.apiClient;
-        if(apiClient.isConnected())
-        Auth.GoogleSignInApi.signOut(apiClient).setResultCallback(
-                new ResultCallback<Status>() {
-                    @Override
-                    public void onResult(Status status) {
-                        UserUtil.saveUserInfo(null);
-                        Intent intent = new Intent(context, LoginActivity.class);
-                        startActivity(intent);
-                        finish();
-                    }
-                });
+
+        if(XmppUtil.getInstance().getConnection().isConnected()){
+            XmppUtil.getInstance().getConnection().disconnect();
+        }
+
+        UserUtil.saveUserInfo(null);
+        Intent intent = new Intent(context, LoginActivity.class);
+        startActivity(intent);
+        finish();
     }
 }

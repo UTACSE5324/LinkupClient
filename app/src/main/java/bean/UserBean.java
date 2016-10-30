@@ -17,6 +17,7 @@ public class UserBean implements Serializable{
     String id;
     String avatar;
     String token;
+    String language;
 
     public String getUsername() {
         return username;
@@ -42,6 +43,10 @@ public class UserBean implements Serializable{
         return token;
     }
 
+    public String getLanguage() {
+        return language;
+    }
+
     public void setUsername(String username) {
         this.username = username;
     }
@@ -64,5 +69,9 @@ public class UserBean implements Serializable{
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
     }
 }
