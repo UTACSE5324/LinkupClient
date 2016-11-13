@@ -19,10 +19,10 @@ import set2.linkup.R;
  * Created on 2016/10/2 0002.
  */
 
-public class ChatRecyclerViewAdapter extends RecyclerView.Adapter{
+public class GroupRecyclerViewAdapter extends RecyclerView.Adapter{
     private Context context;
 
-    public ChatRecyclerViewAdapter(Context context){
+    public GroupRecyclerViewAdapter(Context context){
         this.context = context;
     }
 

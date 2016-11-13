@@ -68,11 +68,9 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        ViewPager viewpager = (ViewPager) findViewById(R.id.container);
 
         SectionsPagerAdapter adapter = new SectionsPagerAdapter(this.getSupportFragmentManager());
-        viewpager = (ViewPager) findViewById(R.id.container);
-        //防止viewpager刷新
+        ViewPager viewpager = (ViewPager) findViewById(R.id.container);
 
         viewpager.setOffscreenPageLimit(3);
         viewpager.setAdapter(adapter);
@@ -86,11 +84,9 @@ public class MainActivity extends AppCompatActivity
         TextView language = (TextView) navigationView.getHeaderView(0).findViewById(R.id.language);
         TextView email = (TextView) navigationView.getHeaderView(0).findViewById(R.id.email);
 
-        try {
-            Picasso.with(this).load(LinkupApplication.getStringPref(UserUtil.AVATAR)).into(avatar);
-        }catch(Exception e){
-            avatar.setImageResource(R.mipmap.ic_account_circle_black_48dp);
-        }
+
+        XmppUtil.getInstance().getAvatar(avatar,LinkupApplication.getStringPref(UserUtil.UNAME));
+
         String un = LinkupApplication.getStringPref(UserUtil.UNAME);
         String la = LinkupApplication.getStringPref(UserUtil.LANGUAGE);
         String em = LinkupApplication.getStringPref(UserUtil.EMAIL);
@@ -106,6 +102,7 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
+            //Quit the App, disconnect the Server
             if(XmppUtil.getInstance().getConnection().isConnected()){
                 XmppUtil.getInstance().getConnection().disconnect();
             }
@@ -187,6 +184,12 @@ public class MainActivity extends AppCompatActivity
 
     public void signOut(){
 
+        /*
+        * SignOut
+        * First disconnect the server
+        * Second clear the local data
+        * */
+
         if(XmppUtil.getInstance().getConnection().isConnected()){
             XmppUtil.getInstance().getConnection().disconnect();
         }
@@ -195,5 +198,15 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(context, LoginActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        try {
+            setAccount();
+        }catch (Exception e){
+
+        }
     }
 }

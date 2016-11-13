@@ -78,6 +78,7 @@
                 android:layout_height="wrap_content">
 
                 <TextView
+                    android:id="@+id/tv_avatar"
                     android:text="Change Avatar"
                     android:textColor="@color/colorText"
                     android:textSize="16sp"
@@ -103,6 +104,7 @@
                 android:layout_height="wrap_content">
 
                 <TextView
+                    android:id="@+id/tv_password"
                     android:text="Change Password"
                     android:textColor="@color/colorText"
                     android:textSize="16sp"

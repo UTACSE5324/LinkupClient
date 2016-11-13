@@ -2,6 +2,8 @@ package adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +15,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import bean.MessageBean;
+import connect.XmppUtil;
 import service.LinkupApplication;
 import set2.linkup.MessageActivity;
 import set2.linkup.R;
@@ -44,7 +47,7 @@ public class MessageRecyclerViewAdapter extends RecyclerView.Adapter{
     private boolean showTranslate;
 
 
-    public MessageRecyclerViewAdapter(Context context, List<MessageBean> msgList){
+    public MessageRecyclerViewAdapter(Context context,List<MessageBean> msgList){
         this.context = context;
         this.msgList = msgList;
         this.showTranslate = false;
@@ -86,33 +89,50 @@ public class MessageRecyclerViewAdapter extends RecyclerView.Adapter{
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i){
         ItemViewHolder itemViewHolder = (ItemViewHolder) viewHolder;
 
-        itemViewHolder.avatar.setImageResource(R.mipmap.ic_account_circle_black_48dp);
+        MessageBean bean = msgList.get(i);
 
-        if(showTranslate)
-        itemViewHolder.tvDate.setText("translated "
-                +DateUtil.getDateNormal(msgList.get(i).getDateline()));
-        else
-            itemViewHolder.tvDate.setText(DateUtil.getDateNormal(msgList.get(i).getDateline()));
+        XmppUtil.getInstance().getAvatar(itemViewHolder.avatar, bean.getUser());
 
-        if(showTranslate && msgList.get(i).getTranslate()!=null){
-            itemViewHolder.tvMessage.setText(msgList.get(i).getTranslate());
+        if(showTranslate) {
+            String s = "translated "
+                    + DateUtil.getDateNormal(bean.getDateline());
+            itemViewHolder.tvDate.setText(s);
+        }else
+            itemViewHolder.tvDate.setText(DateUtil.getDateNormal(bean.getDateline()));
+
+        if(bean.getMessage()!=null && bean.getMessage().length()>0) {
+            itemViewHolder.ivMessage.setVisibility(View.GONE);
+            itemViewHolder.tvMessage.setVisibility(View.VISIBLE);
+
+            if (showTranslate && msgList.get(i).getTranslate() != null) {
+                itemViewHolder.tvMessage.setText(bean.getTranslate());
+            } else {
+                itemViewHolder.tvMessage.setText(bean.getMessage());
+            }
         }else{
-            itemViewHolder.tvMessage.setText(msgList.get(i).getMessage());
+            itemViewHolder.ivMessage.setVisibility(View.VISIBLE);
+            itemViewHolder.tvMessage.setVisibility(View.GONE);
+
+            Bitmap bitmap = BitmapFactory.decodeByteArray(bean.getImage(), 0, bean.getImage().length);
+
+            itemViewHolder.ivMessage.setImageBitmap(bitmap);
         }
+
     }
 
     /*
     * ViewHolder for RecyclerView to reuse the recycle of Item
     * */
     class ItemViewHolder extends RecyclerView.ViewHolder{
-        ImageView avatar;
+        ImageView avatar,ivMessage;
         TextView tvMessage,tvDate;
 
         public ItemViewHolder(View itemView){
             super(itemView);
 
             avatar = (ImageView) itemView.findViewById(R.id.iv_item);
-            tvMessage = (TextView) itemView.findViewById(R.id.tv_item);
+            tvMessage = (TextView) itemView.findViewById(R.id.tv_message);
+            ivMessage = (ImageView) itemView.findViewById(R.id.iv_message);
             tvDate = (TextView) itemView.findViewById(R.id.tv_date);
 
         }

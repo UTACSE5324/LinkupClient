@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'android-apt'
 
 android {
     compileSdkVersion 25
@@ -10,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId "set2.linkup"
-        minSdkVersion 15
+        minSdkVersion 19
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -53,5 +54,8 @@ dependencies {
     compile 'com.rengwuxian.materialedittext:library:2.1.4'
     //XMPP asmack
     compile files('libs/asmack-android-18-0.8.9.jar')
+
+    compile "com.github.hotchemi:permissionsdispatcher:2.1.2"
+    apt "com.github.hotchemi:permissionsdispatcher-processor:2.1.2"
 }
 apply plugin: 'com.google.gms.google-services'

@@ -1,12 +1,16 @@
 package set2.linkup;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,7 +24,13 @@ import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManager;
 import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.util.StringUtils;
+import org.jivesoftware.smackx.filetransfer.FileTransferManager;
+import org.jivesoftware.smackx.filetransfer.OutgoingFileTransfer;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +42,8 @@ import connect.HttpUtil;
 import connect.XmppUtil;
 import okhttp3.Headers;
 import okhttp3.Response;
+import service.LinkupApplication;
+import util.UserUtil;
 
 import static service.LinkupApplication.context;
 
@@ -42,13 +54,13 @@ import static service.LinkupApplication.context;
  */
 
 public class MessageActivity extends AppCompatActivity {
-    private final static int SENDMSG = 1;
+    private final static int SEND_IMG = 1;
 
     private Toolbar toolbar;
     private RecyclerView recyclerView;
 
     private EditText etReply;
-    private ImageView ivReply;
+    private ImageView ivReply,ivImage;
 
     /*show this dialog when waiting for response of the Translate API*/
     private ProgressDialog progressDialog;
@@ -122,6 +134,7 @@ public class MessageActivity extends AppCompatActivity {
 
         etReply = (EditText) findViewById(R.id.et_reply);
         ivReply = (ImageView) findViewById(R.id.iv_reply);
+        ivImage = (ImageView) findViewById(R.id.iv_image);
 
         msgList = new ArrayList<>();
         adapter = new MessageRecyclerViewAdapter(this,msgList);
@@ -136,8 +149,10 @@ public class MessageActivity extends AppCompatActivity {
                         if(etReply.getText().length()>0){
                             try {
                                 newChat.sendMessage(etReply.getText().toString());
+
                                 MessageBean bean = new MessageBean();
                                 bean.setPrimary(true);
+                                bean.setUser(LinkupApplication.getStringPref(UserUtil.UNAME));
                                 bean.setMessage(etReply.getText().toString());
                                 bean.setDateline(System.currentTimeMillis());
                                 msgList.add(bean);
@@ -151,6 +166,17 @@ public class MessageActivity extends AppCompatActivity {
                     }
                 }
         );
+
+        ivImage.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(MessageActivity.this,ImgFolderActivity.class);
+                        intent.putExtra("max",1);
+                        startActivityForResult(intent,SEND_IMG);
+                    }
+                }
+        );
     }
 
     public void initData(){
@@ -161,7 +187,18 @@ public class MessageActivity extends AppCompatActivity {
 
                             MessageBean bean = new MessageBean();
                             bean.setPrimary(false);
-                            bean.setMessage(message.getBody());
+                            bean.setUser(uName);
+
+                            String msg = message.getBody();
+
+                            if(msg.length() > 50){
+                                byte[] bytes = Base64.decode(msg, Base64.DEFAULT);
+
+                                bean.setImage(bytes);
+                            }else{
+                                bean.setMessage(msg);
+                            }
+
                             bean.setDateline(System.currentTimeMillis());
                             msgList.add(bean);
 
@@ -169,6 +206,44 @@ public class MessageActivity extends AppCompatActivity {
                             }
                     }  
         });  
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == -1) {
+            switch(requestCode){
+                case SEND_IMG:
+                    try {
+                        List<String> resList = (List<String>) data.getSerializableExtra("result");
+
+                        FileInputStream fis = new FileInputStream(resList.get(0));
+                        Bitmap bitmap = BitmapFactory.decodeStream(fis);
+                        fis.close();
+
+                        ByteArrayOutputStream output = new ByteArrayOutputStream();//初始化一个流对象
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, output);//把bitmap100%高质量压缩 到 output对象里
+                        bitmap.recycle();//自由选择是否进行回收
+                        byte[] image = output.toByteArray();//转换成功了
+                        String encodeImage = StringUtils.encodeBase64(image);
+
+                        newChat.sendMessage(encodeImage);
+
+                        MessageBean bean = new MessageBean();
+                        bean.setPrimary(true);
+                        bean.setUser(LinkupApplication.getStringPref(UserUtil.UNAME));
+                        bean.setImage(image);
+                        bean.setDateline(System.currentTimeMillis());
+                        msgList.add(bean);
+
+                        handler.sendEmptyMessage(0);
+                    }catch(Exception e){
+
+                    }
+                    break;
+            }
+        }
     }
 
     @Override

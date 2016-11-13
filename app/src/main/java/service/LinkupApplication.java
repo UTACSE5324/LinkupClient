@@ -55,7 +55,7 @@ public class LinkupApplication extends Application{
         OkHttpFinalConfiguration.Builder builder =
                 new OkHttpFinalConfiguration.Builder();
 
-        //标准http请求头
+        //common http header
         Headers commonHeaders = new Headers.Builder().build();
         builder.setCommenHeaders(commonHeaders);
 

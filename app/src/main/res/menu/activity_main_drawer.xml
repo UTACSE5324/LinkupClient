@@ -10,10 +10,6 @@
             android:id="@+id/nav_language"
             android:icon="@mipmap/ic_g_translate_black_24dp"
             android:title="Language"/>
-        <item
-            android:id="@+id/nav_setting"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="Settings"/>
     </group>
 
     <item android:title="Other">

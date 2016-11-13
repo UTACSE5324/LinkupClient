@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -53,11 +54,15 @@ import org.jivesoftware.smackx.search.UserSearchManager;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
 import bean.UserBean;
+import service.LinkupApplication;
+import set2.linkup.R;
 import util.FileUtil;
+import util.UserUtil;
 
 import static android.R.attr.data;
 import static org.jivesoftware.smackx.filetransfer.FileTransfer.Error.connection;
@@ -68,12 +73,11 @@ import static org.jivesoftware.smackx.workgroup.packet.RoomTransfer.Type.user;
  */
 
 public class XmppUtil {
-    private static final String HOST = "10.226.4.3";
+    private static final String HOST = "192.168.0.102";
     private static final int PORT = 5222;
     private static final String SERVER_NAME = "linkupserver";
     private static XmppUtil instance;
     private XMPPConnection conn;
-
 
     public static XmppUtil getInstance() {
         if (instance == null) {
@@ -104,6 +108,7 @@ public class XmppUtil {
                         Form searchForm = usm.getSearchForm("search." + conn.getServiceName());
                         Form answerForm = searchForm.createAnswerForm();
                         answerForm.setAnswer("Email", true);
+                        answerForm.setAnswer("Username", true);
                         answerForm.setAnswer("search", key);
 
                         ReportedData data = usm.getSearchResults(answerForm, "search." + conn.getServiceName());
@@ -159,7 +164,7 @@ public class XmppUtil {
         }).start();
     }
 
-    public void register(final Handler handler, final int what, final String uname, final String pword) {
+    public void register(final Handler handler, final int what, final String uname, final String email, final String pword) {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -171,34 +176,34 @@ public class XmppUtil {
 
                 try {
                     if (conn.isConnected()) {
+
                         Registration reg = new Registration();
-                        reg.setUsername(uname);
-                        reg.setPassword(pword);
+                        reg.setType(IQ.Type.SET);
                         reg.setTo(conn.getServiceName());
+                        reg.setUsername(uname);//注意这里createAccount注册时，参数是username，不是jid，是“@”前面的部分。
+                        reg.setPassword(pword);
                         reg.addAttribute("android", "geolo_createUser_android");
 
-                        PacketFilter filter = new AndFilter(new PacketIDFilter(reg.getPacketID()), new PacketTypeFilter(IQ.class));
-                        PacketCollector collector = getConnection().createPacketCollector(filter);
-
+                        PacketFilter filter = new AndFilter(new PacketIDFilter(reg.getPacketID()),
+                                new PacketTypeFilter(IQ.class));
+                        PacketCollector collector = conn.createPacketCollector(filter);
                         conn.sendPacket(reg);
-
                         IQ result = (IQ) collector.nextResult(SmackConfiguration.getPacketReplyTimeout());
-                        collector.cancel();
+                        // Stop queuing results
+                        collector.cancel();//停止请求results（是否成功的结果）
+
                         if (result == null) {
                             msg.arg1 = 0;
-                        } else if (result.getType() == IQ.Type.RESULT) {
-                            msg.arg1 = 1;
-                        } else {
+                        } else if (result.getType() == IQ.Type.ERROR) {
                             if (result.getError().toString().equalsIgnoreCase("conflict(409)")) {
                                 msg.arg1 = 2;
                             } else {
                                 msg.arg1 = 3;
                             }
+                        } else if (result.getType() == IQ.Type.RESULT) {
+                            msg.arg1 = 1;
                         }
-
-                    } else
-                        msg.arg1 = -1;
-
+                    }
                 } catch (Exception e) {
                     msg.arg1 = -1;
                 }
@@ -222,13 +227,15 @@ public class XmppUtil {
                     ProviderManager.getInstance().addIQProvider("vCard", "vcard-temp",
                             new org.jivesoftware.smackx.provider.VCardProvider());
 
-                    vcard.load(conn, user + "@" + conn.getServiceName());
+                    vcard.load(conn, user + "@linkupserver");
 
-                    if (vcard.getAvatar() != null) {
-                        bais = new ByteArrayInputStream(vcard.getAvatar());
-                        Bitmap bitmap = BitmapFactory.decodeStream(bais);
+                    if (vcard.getOrganization() != null) {
+                        byte[] bytes = Base64.decode(vcard.getOrganization().getBytes(), Base64.DEFAULT);
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                         view.setImageBitmap(bitmap);
-                    }
+                    } else
+                        view.setImageResource(R.mipmap.ic_account_circle_black_48dp);
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -236,39 +243,77 @@ public class XmppUtil {
         }).start();
     }
 
-    private void setUserImage(final String path){
+    public void setAvatar(final Handler handler, final int what, final byte[] image) {
+
         new Thread() {
             @Override
             public void run() {
+                Message msg = new Message();
+                msg.what = what;
+
                 try {
+
                     if (conn == null || !conn.isConnected())
                         initConnection();
 
                     VCard card = new VCard();
+                    card.setFirstName(LinkupApplication.getStringPref(UserUtil.UNAME));
                     card.load(conn);
-
-                    byte[] image = FileUtil.readTextFileToByte(new File(path));
 
                     PacketFilter filter = new AndFilter(new PacketIDFilter(
                             card.getPacketID()), new PacketTypeFilter(IQ.class));
                     PacketCollector collector = conn
                             .createPacketCollector(filter);
                     String encodeImage = StringUtils.encodeBase64(image);
-                    card.setAvatar(image, encodeImage);
 
-                    card.setField("PHOTO", "<TYPE>image/jpg</TYPE><BINVAL>"
-                            + encodeImage + "</BINVAL>", true);
+                    card.setOrganization(encodeImage);
+
+//                    card.setField("PHOTO", "<TYPE>image/jpg</TYPE><BINVAL>"
+//                           + encodeImage + "</BINVAL>", true);
+//                    card.setAvatar(image, encodeImage);
 
                     card.save(conn);
+
                     IQ iq = (IQ) collector.nextResult(SmackConfiguration
                             .getPacketReplyTimeout());
 
+                    msg.arg1 = 1;
                 } catch (Exception e) {
-
+                    msg.arg1 = -1;
                 }
+
+                handler.sendMessage(msg);
             }
         }.start();
     }
+
+    public void changePassword(final Handler handler, final int what, final String pwd) {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (conn == null || !conn.isConnected())
+                    initConnection();
+
+                Message msg = new Message();
+                msg.what = what;
+
+                try {
+                    if (conn.isConnected()) {
+                        conn.getAccountManager().changePassword(pwd);
+                        msg.arg1 = 1;
+                    } else
+                        msg.arg1 = -1;
+
+                } catch (Exception e) {
+                    msg.arg1 = -1;
+                }
+
+                handler.sendMessage(msg);
+            }
+        }).start();
+    }
+
     public boolean initConnection() {
         boolean isConnect = false;
 

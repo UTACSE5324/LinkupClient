@@ -11,7 +11,6 @@ import android.view.ViewGroup;
 
 import java.util.List;
 
-import adapter.ChatRecyclerViewAdapter;
 import adapter.FriendRecyclerViewAdapter;
 import bean.UserBean;
 import connect.XmppUtil;
@@ -37,7 +36,6 @@ public class FriendsFragment extends Fragment {
         public void handleMessage(android.os.Message msg) {
             switch(msg.what){
                 case FRIENDS:
-                    System.out.println(">>>>>>"+msg.arg1);
                     if(msg.arg1==1){
                         friendsList = (List<UserBean>)msg.obj;
                         friendRecyclerViewAdapter.setUserList(friendsList);

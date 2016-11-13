@@ -1,5 +1,7 @@
 package bean;
 
+import android.graphics.Bitmap;
+
 /**
  * Name: MessageBean
  * Description: Bean for the message received
@@ -18,10 +20,14 @@ package bean;
  */
 
 public class MessageBean {
+    String user;
     String message;
     String translate;
+    byte[] image;
     long dateline;
     boolean primary;
+
+    public String getUser(){return user;}
 
     public String getMessage() {
         return message;
@@ -30,6 +36,8 @@ public class MessageBean {
     public String getTranslate() {
         return translate;
     }
+
+    public byte[] getImage(){return image;}
 
     public long getDateline() {
         return dateline;
@@ -54,4 +62,8 @@ public class MessageBean {
     public void setTranslate(String translate) {
         this.translate = translate;
     }
+
+    public void setImage(byte[] image){this.image = image;}
+
+    public void setUser(String user){this.user = user;}
 }

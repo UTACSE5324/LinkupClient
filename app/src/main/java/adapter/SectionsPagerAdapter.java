@@ -6,9 +6,8 @@ import android.support.v4.app.FragmentPagerAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import fragment.ChatFragment;
 import fragment.FriendsFragment;
+import fragment.GroupFragment;
 import fragment.TranslateFragment;
 
 /**
@@ -25,8 +24,9 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
     * */
     public SectionsPagerAdapter(FragmentManager fm) {
         super(fm);
-        fragments.add(ChatFragment.newInstance());
+
         fragments.add(FriendsFragment.newInstance());
+        fragments.add(GroupFragment.newInstance());
         fragments.add(TranslateFragment.newInstance());
     }
 

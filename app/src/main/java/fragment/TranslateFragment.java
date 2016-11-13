@@ -1,6 +1,9 @@
 package fragment;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -88,7 +91,6 @@ public class TranslateFragment extends Fragment {
                     }
                 }
         );
-
         return rootView;
     }
 

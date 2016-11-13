@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import bean.UserBean;
+import connect.XmppUtil;
 import set2.linkup.MessageActivity;
 import set2.linkup.R;
 
@@ -64,7 +65,8 @@ public class FriendRecyclerViewAdapter extends RecyclerView.Adapter{
 
         itemViewHolder.uname = uname;
 
-        itemViewHolder.avatar.setImageResource(R.mipmap.ic_account_circle_black_48dp);
+        //itemViewHolder.avatar.setImageResource(R.mipmap.ic_account_circle_black_48dp);
+        XmppUtil.getInstance().getAvatar(itemViewHolder.avatar, uname);
 
         itemViewHolder.tvTitle.setText(uname);
         itemViewHolder.tvContent.setText(email);

@@ -34,6 +34,7 @@ import util.UserUtil;
 public class LoginActivity extends FragmentActivity implements View.OnClickListener{
     private final int LOGIN = 1;
     private final int REGISTER = 2;
+    private final int LOGIN_AUTO = 3;
 
     private Context context;
 
@@ -41,7 +42,7 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
 
 
     private TextView typeText,typeButton,submitButton;
-    private MaterialEditText username,password,confirm;
+    private MaterialEditText username,password,confirm,email;
 
     private ProgressDialog dialog;
 
@@ -55,8 +56,11 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
                        XMPPConnection conn = XmppUtil.getInstance().getConnection();
 
                        UserBean bean = new UserBean();
-                       bean.setUsername(conn.getAccountManager().getAccountAttribute("name"));
                        bean.setEmail(conn.getAccountManager().getAccountAttribute("email"));
+
+                       if(username!=null&&username.getText().toString().length()>0){
+                           bean.setUsername(username.getText().toString());
+                       }
 
                        if(password!=null&&password.getText().toString().length()>0)
                            bean.setPassword(password.getText().toString());
@@ -64,6 +68,17 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
                        bean.setLanguage("hi");
 
                        UserUtil.saveUserInfo(bean);
+
+                       Intent intent = new Intent(context, MainActivity.class);
+                       startActivity(intent);
+                       finishAct();
+                   }
+                   if(msg.arg1==-1)
+                       Toast.makeText(context,"Login fail",Toast.LENGTH_SHORT).show();
+                   break;
+               case LOGIN_AUTO:
+                   if(msg.arg1==1) {
+                       Toast.makeText(context, "Login success", Toast.LENGTH_SHORT).show();
 
                        Intent intent = new Intent(context, MainActivity.class);
                        startActivity(intent);
@@ -109,7 +124,7 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
         }else{
             dialog.show();
             XmppUtil.getInstance().login(
-                    handler, LOGIN, LinkupApplication.getStringPref(UserUtil.UNAME),
+                    handler, LOGIN_AUTO, LinkupApplication.getStringPref(UserUtil.UNAME),
                     LinkupApplication.getStringPref(UserUtil.PASSWORD)
             );
         }
@@ -124,6 +139,7 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
         username = (MaterialEditText) findViewById(R.id.username);
         password = (MaterialEditText) findViewById(R.id.password);
         confirm = (MaterialEditText) findViewById(R.id.confirm);
+        email = (MaterialEditText) findViewById(R.id.email);
 
         typeButton.setOnClickListener(this);
         submitButton.setOnClickListener(this);
@@ -139,23 +155,26 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
                     login = false;
                     typeText.setText("Register");
                     confirm.setVisibility(View.VISIBLE);
+                    email.setVisibility(View.VISIBLE);
                     typeButton.setText("Login");
                 }else{
                     login = true;
                     typeText.setText("Login");
                     confirm.setVisibility(View.INVISIBLE);
+                    email.setVisibility(View.INVISIBLE);
                     typeButton.setText("Register");
                 }
                 break;
             case R.id.btn_submit:
                 String uname = username.getText().toString();
                 String pword = password.getText().toString();
+                String uemail = email.getText().toString();
 
                 dialog.show();
                 if(login)
                     XmppUtil.getInstance().login(handler, LOGIN, uname, pword);
                 else if(confirm.getText().toString().equals(pword)){
-                    XmppUtil.getInstance().register(handler, LOGIN, uname, pword);
+                    XmppUtil.getInstance().register(handler, REGISTER, uname,uemail, pword);
                 }
                 break;
         }

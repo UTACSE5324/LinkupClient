@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.rengwuxian.materialedittext.MaterialEditText
+        android:id="@+id/password"
+        android:textSize="18sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:hint="@string/password"
+        app:met_floatingLabel="highlight"
+        app:met_floatingLabelText="@string/password"/>
+
+    <com.rengwuxian.materialedittext.MaterialEditText
+        android:id="@+id/confirm"
+        android:textSize="18sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:hint="@string/confirm"
+        app:met_floatingLabel="highlight"
+        app:met_floatingLabelText="@string/confirm"/>
+
+    <RelativeLayout
+        android:layout_marginTop="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/submit"
+            android:padding="16dp"
+            android:text="submit"
+            android:background="?android:attr/selectableItemBackground"
+            android:layout_alignParentRight="true"
+            android:textColor="@color/colorAccent"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cancle"
+            android:padding="16dp"
+            android:text="cancle"
+            android:background="?android:attr/selectableItemBackground"
+            android:layout_toLeftOf="@id/submit"
+            android:textColor="@color/colorTextSecond"/>
+    </RelativeLayout>
+</LinearLayout>
