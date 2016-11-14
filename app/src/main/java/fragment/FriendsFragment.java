@@ -14,7 +14,9 @@ import java.util.List;
 import adapter.FriendRecyclerViewAdapter;
 import bean.UserBean;
 import connect.XmppUtil;
+import service.LinkupApplication;
 import set2.linkup.R;
+import util.UserUtil;
 
 /**
  * Name: FriendsFragment
@@ -38,6 +40,12 @@ public class FriendsFragment extends Fragment {
                 case FRIENDS:
                     if(msg.arg1==1){
                         friendsList = (List<UserBean>)msg.obj;
+
+                        for(int i = 0 ; i<friendsList.size() ; i++){
+                            if(friendsList.get(i).getUsername().equals(LinkupApplication.getStringPref(UserUtil.UNAME)))
+                                friendsList.remove(i);
+                        }
+
                         friendRecyclerViewAdapter.setUserList(friendsList);
                         friendRecyclerViewAdapter.notifyDataSetChanged();
                     }

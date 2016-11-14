@@ -24,8 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import adapter.SelectGridViewAdapter;
-import permissions.dispatcher.NeedsPermission;
-import permissions.dispatcher.RuntimePermissions;
 
 /**
  * Created by zhang on 2016/11/12 0012.

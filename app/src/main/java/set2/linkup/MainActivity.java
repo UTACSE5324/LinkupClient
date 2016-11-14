@@ -19,11 +19,6 @@ import android.widget.TextView;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
-import com.squareup.picasso.Picasso;
 
 import adapter.SectionsPagerAdapter;
 import connect.XmppUtil;
@@ -72,7 +67,7 @@ public class MainActivity extends AppCompatActivity
         SectionsPagerAdapter adapter = new SectionsPagerAdapter(this.getSupportFragmentManager());
         ViewPager viewpager = (ViewPager) findViewById(R.id.container);
 
-        viewpager.setOffscreenPageLimit(3);
+        viewpager.setOffscreenPageLimit(2);
         viewpager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewpager);
     }

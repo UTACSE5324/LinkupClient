@@ -16,11 +16,9 @@ import java.util.List;
 
 import bean.MessageBean;
 import connect.XmppUtil;
-import service.LinkupApplication;
-import set2.linkup.MessageActivity;
+import set2.linkup.ImgCaptureActivity;
 import set2.linkup.R;
 import util.DateUtil;
-import util.UserUtil;
 
 /**
  * Name: MessageRecyclerViewAdapter
@@ -89,7 +87,7 @@ public class MessageRecyclerViewAdapter extends RecyclerView.Adapter{
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i){
         ItemViewHolder itemViewHolder = (ItemViewHolder) viewHolder;
 
-        MessageBean bean = msgList.get(i);
+        final MessageBean bean = msgList.get(i);
 
         XmppUtil.getInstance().getAvatar(itemViewHolder.avatar, bean.getUser());
 
@@ -118,17 +116,34 @@ public class MessageRecyclerViewAdapter extends RecyclerView.Adapter{
             itemViewHolder.ivMessage.setImageBitmap(bitmap);
         }
 
+        itemViewHolder.ivMessage.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if(bean.getMessage() == null ||bean.getMessage().length()==0){
+
+                            Intent intent = new Intent(context, ImgCaptureActivity.class);
+                            intent.putExtra("image", bean.getImage());
+                            context.startActivity(intent);
+                            
+                        }
+                    }
+                }
+        );
     }
 
     /*
     * ViewHolder for RecyclerView to reuse the recycle of Item
     * */
     class ItemViewHolder extends RecyclerView.ViewHolder{
+        View itemView;
         ImageView avatar,ivMessage;
         TextView tvMessage,tvDate;
 
         public ItemViewHolder(View itemView){
             super(itemView);
+
+            this.itemView = itemView;
 
             avatar = (ImageView) itemView.findViewById(R.id.iv_item);
             tvMessage = (TextView) itemView.findViewById(R.id.tv_message);

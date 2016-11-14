@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId "set2.linkup"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -45,7 +45,7 @@ dependencies {
     //Fast Json
     compile files('libs/fastjson-1.1.46.android.jar')
     //Google Login
-    compile 'com.google.android.gms:play-services-auth:9.8.0'
+    //compile 'com.google.android.gms:play-services-auth:9.8.0'
     //Picasso
     compile 'com.squareup.picasso:picasso:2.5.2'
     //MaterialDialog
@@ -54,8 +54,7 @@ dependencies {
     compile 'com.rengwuxian.materialedittext:library:2.1.4'
     //XMPP asmack
     compile files('libs/asmack-android-18-0.8.9.jar')
-
-    compile "com.github.hotchemi:permissionsdispatcher:2.1.2"
-    apt "com.github.hotchemi:permissionsdispatcher-processor:2.1.2"
+    //textRecognizer
+    compile 'com.google.android.gms:play-services-vision:9.0.0'
 }
 apply plugin: 'com.google.gms.google-services'

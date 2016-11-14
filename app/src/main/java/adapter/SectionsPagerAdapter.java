@@ -26,7 +26,7 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
         super(fm);
 
         fragments.add(FriendsFragment.newInstance());
-        fragments.add(GroupFragment.newInstance());
+        //fragments.add(GroupFragment.newInstance());
         fragments.add(TranslateFragment.newInstance());
     }
 
@@ -37,7 +37,7 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        return 3;
+        return 2;
     }
 
     /*

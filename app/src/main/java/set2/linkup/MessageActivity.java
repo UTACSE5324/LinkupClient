@@ -60,7 +60,7 @@ public class MessageActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
 
     private EditText etReply;
-    private ImageView ivReply,ivImage;
+    private ImageView ivReply, ivImage;
 
     /*show this dialog when waiting for response of the Translate API*/
     private ProgressDialog progressDialog;
@@ -73,32 +73,33 @@ public class MessageActivity extends AppCompatActivity {
     private String uName;
     private Chat newChat;
 
-
-    private BaseHttpRequestCallback callback = new BaseHttpRequestCallback(){
+    private BaseHttpRequestCallback callback = new BaseHttpRequestCallback() {
         @Override
         public void onResponse(Response httpResponse, String response, Headers headers) {
-            try{
-                TranslateBean bean =  JSON.parseObject(response, TranslateBean.class);
+            try {
+                TranslateBean bean = JSON.parseObject(response, TranslateBean.class);
 
-                for(int i = 0 ; i<msgList.size() ;i++){
+                for (int i = 0; i < msgList.size(); i++) {
                     String trans = bean.getData().getTranslations().get(i).getTranslatedText();
                     msgList.get(i).setTranslate(trans);
                 }
 
-                if(adapter!=null){
+                if (adapter != null) {
                     adapter.reverseTranslate();
                     adapter.notifyDataSetChanged();
                 }
 
-                Toast.makeText(context,"Messages have been translated",Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Messages have been translated", Toast.LENGTH_SHORT).show();
 
                 progressDialog.dismiss();
-            }catch (Exception e){}
-        }};
+            } catch (Exception e) {
+            }
+        }
+    };
 
     private Handler handler = new Handler() {
         public void handleMessage(android.os.Message msg) {
-            adapter.notifyItemRangeInserted(msgList.size(),1);
+            adapter.notifyItemRangeInserted(msgList.size(), 1);
             recyclerView.scrollToPosition(recyclerView.getChildCount());
         }
     };
@@ -121,7 +122,7 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
-    public void initViews(){
+    public void initViews() {
 
         progressDialog = new ProgressDialog(this);
 
@@ -137,7 +138,7 @@ public class MessageActivity extends AppCompatActivity {
         ivImage = (ImageView) findViewById(R.id.iv_image);
 
         msgList = new ArrayList<>();
-        adapter = new MessageRecyclerViewAdapter(this,msgList);
+        adapter = new MessageRecyclerViewAdapter(this, msgList);
 
         recyclerView.setAdapter(adapter);
 
@@ -146,7 +147,7 @@ public class MessageActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if(etReply.getText().length()>0){
+                        if (etReply.getText().length() > 0) {
                             try {
                                 newChat.sendMessage(etReply.getText().toString());
 
@@ -161,7 +162,8 @@ public class MessageActivity extends AppCompatActivity {
 
                                 handler.sendEmptyMessage(0);
 
-                            }catch(Exception e){}
+                            } catch (Exception e) {
+                            }
                         }
                     }
                 }
@@ -171,41 +173,41 @@ public class MessageActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Intent intent = new Intent(MessageActivity.this,ImgFolderActivity.class);
-                        intent.putExtra("max",1);
-                        startActivityForResult(intent,SEND_IMG);
+                        Intent intent = new Intent(MessageActivity.this, ImgFolderActivity.class);
+                        intent.putExtra("max", 1);
+                        startActivityForResult(intent, SEND_IMG);
                     }
                 }
         );
     }
 
-    public void initData(){
+    public void initData() {
         ChatManager chatmanager = XmppUtil.getInstance().getConnection().getChatManager();
-        newChat = chatmanager.createChat(uName + "@linkupserver/Smack" , new MessageListener() {
-            public void processMessage(Chat chat, Message message){
-                        if (message.getBody() != null) {
+        newChat = chatmanager.createChat(uName + "@linkupserver/Smack", new MessageListener() {
+            public void processMessage(Chat chat, Message message) {
+                if (message.getBody() != null) {
 
-                            MessageBean bean = new MessageBean();
-                            bean.setPrimary(false);
-                            bean.setUser(uName);
+                    MessageBean bean = new MessageBean();
+                    bean.setPrimary(false);
+                    bean.setUser(uName);
 
-                            String msg = message.getBody();
+                    String msg = message.getBody();
 
-                            if(msg.length() > 50){
-                                byte[] bytes = Base64.decode(msg, Base64.DEFAULT);
+                    if (msg.length() > 50) {
+                        byte[] bytes = Base64.decode(msg, Base64.DEFAULT);
 
-                                bean.setImage(bytes);
-                            }else{
-                                bean.setMessage(msg);
-                            }
+                        bean.setImage(bytes);
+                    } else {
+                        bean.setMessage(msg);
+                    }
 
-                            bean.setDateline(System.currentTimeMillis());
-                            msgList.add(bean);
+                    bean.setDateline(System.currentTimeMillis());
+                    msgList.add(bean);
 
-                            handler.sendEmptyMessage(0);
-                            }
-                    }  
-        });  
+                    handler.sendEmptyMessage(0);
+                }
+            }
+        });
     }
 
     @Override
@@ -213,7 +215,7 @@ public class MessageActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == -1) {
-            switch(requestCode){
+            switch (requestCode) {
                 case SEND_IMG:
                     try {
                         List<String> resList = (List<String>) data.getSerializableExtra("result");
@@ -223,7 +225,7 @@ public class MessageActivity extends AppCompatActivity {
                         fis.close();
 
                         ByteArrayOutputStream output = new ByteArrayOutputStream();//初始化一个流对象
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, output);//把bitmap100%高质量压缩 到 output对象里
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 10, output);//把bitmap100%高质量压缩 到 output对象里
                         bitmap.recycle();//自由选择是否进行回收
                         byte[] image = output.toByteArray();//转换成功了
                         String encodeImage = StringUtils.encodeBase64(image);
@@ -238,7 +240,7 @@ public class MessageActivity extends AppCompatActivity {
                         msgList.add(bean);
 
                         handler.sendEmptyMessage(0);
-                    }catch(Exception e){
+                    } catch (Exception e) {
 
                     }
                     break;
@@ -256,14 +258,14 @@ public class MessageActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        switch(id){
+        switch (id) {
             //back button
             case android.R.id.home:
                 this.finish();
                 break;
             //translate message button
             case R.id.action_translate:
-                if(msgList.size() > 0) {
+                if (msgList.size() > 0) {
                     if (!showTranslate) {
 
                         List<String> list = new ArrayList<String>();

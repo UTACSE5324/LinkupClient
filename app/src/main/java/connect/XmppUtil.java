@@ -214,6 +214,18 @@ public class XmppUtil {
     }
 
     public void getAvatar(final ImageView view, final String user) {
+
+        final Handler handler = new Handler(){
+            public void handleMessage(android.os.Message msg) {
+
+                if(msg.obj!=null){
+                    Bitmap bitmap = (Bitmap) msg.obj;
+                    view.setImageBitmap(bitmap);
+                }else
+                    view.setImageResource(R.mipmap.ic_account_circle_black_48dp);
+            }
+        };
+
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -229,12 +241,16 @@ public class XmppUtil {
 
                     vcard.load(conn, user + "@linkupserver");
 
+                    Message msg = new Message();
+
                     if (vcard.getOrganization() != null) {
                         byte[] bytes = Base64.decode(vcard.getOrganization().getBytes(), Base64.DEFAULT);
                         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                        view.setImageBitmap(bitmap);
+                        msg.obj = bitmap;
                     } else
-                        view.setImageResource(R.mipmap.ic_account_circle_black_48dp);
+                        msg.obj = null;
+
+                    handler.sendMessage(msg);
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -242,6 +258,7 @@ public class XmppUtil {
             }
         }).start();
     }
+
 
     public void setAvatar(final Handler handler, final int what, final byte[] image) {
 
