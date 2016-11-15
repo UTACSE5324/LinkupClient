@@ -34,6 +34,7 @@ public class FriendRecyclerViewAdapter extends RecyclerView.Adapter{
         this.userList = new ArrayList<>();
     }
 
+    //Get user list
     public void setUserList(List<UserBean> userList){
         this.userList = userList;
     }
@@ -56,6 +57,7 @@ public class FriendRecyclerViewAdapter extends RecyclerView.Adapter{
         return 0;
     }
 
+    //display the user name and email
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i){
         ItemViewHolder itemViewHolder = (ItemViewHolder) viewHolder;
@@ -65,13 +67,14 @@ public class FriendRecyclerViewAdapter extends RecyclerView.Adapter{
 
         itemViewHolder.uname = uname;
 
-        //itemViewHolder.avatar.setImageResource(R.mipmap.ic_account_circle_black_48dp);
+        /*use XmppUtil to get user bitmap*/
         XmppUtil.getInstance().getAvatar(itemViewHolder.avatar, uname);
 
         itemViewHolder.tvTitle.setText(uname);
         itemViewHolder.tvContent.setText(email);
     }
 
+    //ViewHolder for recycle view
     class ItemViewHolder extends RecyclerView.ViewHolder{
         String uname;
         ImageView avatar;

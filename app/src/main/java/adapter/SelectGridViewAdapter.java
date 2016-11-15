@@ -17,8 +17,9 @@ import java.util.List;
 import set2.linkup.R;
 
 /**
- * Created by Charlie on 2016/5/10 0010.
- */
+ *  Name: SelectGridViewAdapter
+ * Description: Adapter for GridView in ImgFolderActivity
+ **/
 public class SelectGridViewAdapter extends BaseAdapter {
 
     private int maxNum;
@@ -52,6 +53,7 @@ public class SelectGridViewAdapter extends BaseAdapter {
         return 0;
     }
 
+    //If image is selected, there will be a check mark on it
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
@@ -85,14 +87,14 @@ public class SelectGridViewAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 ViewHolder holder = (ViewHolder) v.getTag();
-                // 已经选择过该图片
+                // image is selected
                 if (mSelectedImage.contains(path)) {
                     mSelectedImage.remove(path);
 
                     holder.select.setVisibility(View.GONE);
                     holder.imageView.setColorFilter(null);
                 } else
-                // 未选择该图片
+                // image isn't selected
                 {
                     if (mSelectedImage.size() < maxNum) {
                         mSelectedImage.add(path);

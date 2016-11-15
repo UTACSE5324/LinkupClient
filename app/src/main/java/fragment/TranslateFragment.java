@@ -15,16 +15,26 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Toast;
+
+import com.alibaba.fastjson.JSON;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import adapter.SpeechRecyclerViewAdapter;
+import bean.TranslateBean;
+import cn.finalteam.okhttpfinal.BaseHttpRequestCallback;
+import connect.HttpUtil;
 import ocr.OcrCaptureActivity;
+import okhttp3.Headers;
+import okhttp3.Response;
 import set2.linkup.R;
 
 import static android.app.Activity.RESULT_OK;
+import static service.LinkupApplication.context;
 
 /**
  * Name: TranslateFragment
@@ -41,6 +51,33 @@ public class TranslateFragment extends Fragment implements View.OnClickListener 
     private RecyclerView recyclerView;
     private SpeechRecyclerViewAdapter adapter;
 
+    //Recognized Text
+    private ArrayList<String> sourceList;
+    //Translated Text
+    private ArrayList<String> transList;
+
+    private BaseHttpRequestCallback callback = new BaseHttpRequestCallback() {
+        @Override
+        public void onResponse(Response httpResponse, String response, Headers headers) {
+            try {
+                TranslateBean bean = JSON.parseObject(response, TranslateBean.class);
+                transList.clear();
+
+                for (int i = 0; i < bean.getData().getTranslations().size(); i++) {
+                    String trans = bean.getData().getTranslations().get(i).getTranslatedText();
+                    trans = trans.replace("&#39;","'");
+                    transList.add(trans);
+                }
+
+                if (adapter != null) {
+                    adapter.setList(sourceList,transList);
+                    adapter.notifyDataSetChanged();
+                }
+            } catch (Exception e) {
+            }
+        }
+    };
+
     public static TranslateFragment newInstance() {
         TranslateFragment fragment = new TranslateFragment();
         Bundle args = new Bundle();
@@ -56,28 +93,22 @@ public class TranslateFragment extends Fragment implements View.OnClickListener 
 
         context = getActivity();
 
+        sourceList = new ArrayList<>();
+        transList = new ArrayList<>();
+
         recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
 
-        adapter = new SpeechRecyclerViewAdapter(context);
+        adapter = new SpeechRecyclerViewAdapter(context,sourceList,transList);
         recyclerView.setAdapter(adapter);
 
-        Button speakButton = (Button) rootView.findViewById(R.id.btn_speak);
-        Button imageButton = (Button) rootView.findViewById(R.id.btn_camera);
+        LinearLayout speakButton = (LinearLayout) rootView.findViewById(R.id.speak);
+        LinearLayout imageButton = (LinearLayout) rootView.findViewById(R.id.camera);
+        LinearLayout transButton = (LinearLayout) rootView.findViewById(R.id.translate);
+
         PackageManager pm = context.getPackageManager();
-
-
-        imageButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(context, OcrCaptureActivity.class);
-                        context.startActivity(intent);
-                    }
-                }
-        );
 
         List<ResolveInfo> activities = pm.queryIntentActivities(new Intent(
                 RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
@@ -90,16 +121,29 @@ public class TranslateFragment extends Fragment implements View.OnClickListener 
 
             speakButton.setEnabled(false);
 
-            speakButton.setText("Recognizer not present");
-
+            //speakButton.setText("Recognizer not present");
         }
+
+        transButton.setOnClickListener(this);
+        imageButton.setOnClickListener(this);
+
         return rootView;
     }
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.btn_speak) {
-            startVoiceRecognitionActivity();
+        switch (v.getId()){
+            case R.id.speak:
+                startVoiceRecognitionActivity();
+                break;
+            case R.id.camera:
+                Intent intent = new Intent(context, OcrCaptureActivity.class);
+                context.startActivity(intent);
+                break;
+            case R.id.translate:
+                new HttpUtil(HttpUtil.NON_TOKEN_PARAMS)
+                        .translateReverse(sourceList, callback);
+                break;
         }
     }
 
@@ -133,13 +177,10 @@ public class TranslateFragment extends Fragment implements View.OnClickListener 
             // Accept the result
 
             try {
-                ArrayList<String> matches = data
-                        .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                for (int i = 0; i < matches.size(); i++) {
-                    Log.e(i + "", matches.get(i));
-                }
+                sourceList = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                transList.clear();
 
-                adapter.setList(matches);
+                adapter.setList(sourceList,transList);
                 adapter.notifyDataSetChanged();
 
             }catch(Exception e){

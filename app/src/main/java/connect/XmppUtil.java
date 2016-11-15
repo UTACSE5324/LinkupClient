@@ -69,16 +69,20 @@ import static org.jivesoftware.smackx.filetransfer.FileTransfer.Error.connection
 import static org.jivesoftware.smackx.workgroup.packet.RoomTransfer.Type.user;
 
 /**
- * Created by zhang on 2016/10/28 0028.
+ * Name: XmppUtil
+ * Description: Used for Xmpp request.
+ *
+ * Created on 2016/10/2 0002.
  */
 
 public class XmppUtil {
-    private static final String HOST = "192.168.0.102";
+    private static final String HOST = "172.20.10.4";
     private static final int PORT = 5222;
     private static final String SERVER_NAME = "linkupserver";
     private static XmppUtil instance;
     private XMPPConnection conn;
 
+    /*Singleton method*/
     public static XmppUtil getInstance() {
         if (instance == null) {
             instance = new XmppUtil();
@@ -180,7 +184,7 @@ public class XmppUtil {
                         Registration reg = new Registration();
                         reg.setType(IQ.Type.SET);
                         reg.setTo(conn.getServiceName());
-                        reg.setUsername(uname);//注意这里createAccount注册时，参数是username，不是jid，是“@”前面的部分。
+                        reg.setUsername(uname);
                         reg.setPassword(pword);
                         reg.addAttribute("android", "geolo_createUser_android");
 
@@ -331,29 +335,30 @@ public class XmppUtil {
         }).start();
     }
 
+    /*new the Connection method*/
     public boolean initConnection() {
         boolean isConnect = false;
+        if (conn == null || !conn.isConnected()) {
+            ConnectionConfiguration config = new ConnectionConfiguration(HOST, PORT, SERVER_NAME);
 
-        ConnectionConfiguration config = new ConnectionConfiguration(HOST, PORT, SERVER_NAME);
+            config.setDebuggerEnabled(true);
 
-        config.setDebuggerEnabled(true);
+            config.setReconnectionAllowed(true);
+            config.setSendPresence(true);
 
-        config.setReconnectionAllowed(true);
-        config.setSendPresence(true);
+            config.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
 
-        config.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
+            conn = new XMPPConnection(config);
 
-        conn = new XMPPConnection(config);
+            try {
+                configureProviderManager(ProviderManager.getInstance());
+                conn.connect();
 
-        try {
-            configureProviderManager(ProviderManager.getInstance());
-            conn.connect();
-
-            isConnect = true;
-        } catch (Exception e) {
-            e.printStackTrace();
+                isConnect = true;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-
         return isConnect;
     }
 

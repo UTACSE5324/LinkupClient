@@ -1,7 +1,6 @@
 package adapter;
 
 import android.content.Context;
-import android.content.Intent;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -12,37 +11,38 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import bean.UserBean;
-import connect.XmppUtil;
 import service.LinkupApplication;
-import set2.linkup.MessageActivity;
 import set2.linkup.R;
 
 /**
- * Created by zhang on 2016/11/13 0013.
- */
+ *  Name: SpeechRecyclerViewAdapter
+ *  Description: Adapter for RecyclerView in TranslateFragment
+ **/
 
-public class SpeechRecyclerViewAdapter extends RecyclerView.Adapter{
+public class SpeechRecyclerViewAdapter extends RecyclerView.Adapter {
     private Context context;
 
-    private List<String> list;
+    private List<String> sourceList;
+    private List<String> transList;
 
     private TextToSpeech tts;
 
-    public SpeechRecyclerViewAdapter(Context context){
+    public SpeechRecyclerViewAdapter(Context context, List<String> sourceList, List<String> transList) {
         this.context = context;
-        this.list = new ArrayList<>();
+        this.sourceList = sourceList;
+        this.transList = transList;
 
+        /*Speech method by Google API*/
         TextToSpeech.OnInitListener listener =
                 new TextToSpeech.OnInitListener() {
                     @Override
                     public void onInit(final int status) {
                         if (status == TextToSpeech.SUCCESS) {
                             Log.d("TTS", "Text to speech engine started successfully.");
+                            //Set Speech language
                             tts.setLanguage(Locale.US);
                         } else {
                             Log.d("TTS", "Error starting the text to speech engine.");
@@ -52,59 +52,65 @@ public class SpeechRecyclerViewAdapter extends RecyclerView.Adapter{
         tts = new TextToSpeech(LinkupApplication.getContext(), listener);
     }
 
-    public void setList(List<String> list){
-        this.list = list;
+    public void setList(List<String> sourceList, List<String> transList) {
+        this.sourceList = sourceList;
+        this.transList = transList;
     }
 
     @Override
-    public int getItemCount(){
-        return list.size();
+    public int getItemCount() {
+        return sourceList.size();
     }
 
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i){
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_normal, null);
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_trans, null);
         view.setLayoutParams(lp);
         return new SpeechRecyclerViewAdapter.ItemViewHolder(view);
     }
 
     @Override
-    public int getItemViewType(int position){
+    public int getItemViewType(int position) {
         return 0;
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i){
+    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, final int i) {
         ItemViewHolder itemViewHolder = (ItemViewHolder) viewHolder;
 
 
-        final String source = list.get(i);
+        final String source = sourceList.get(i);
 
-        itemViewHolder.text.setText(source);
-        itemViewHolder.image.setImageResource(R.mipmap.ic_translate_black_24dp);
+        itemViewHolder.source.setText(source);
+
+
+        if (transList.size() > i) {
+            itemViewHolder.trans.setText(transList.get(i));
+        } else
+            itemViewHolder.trans.setText("");
 
         itemViewHolder.itemView.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        tts.speak(source, TextToSpeech.QUEUE_ADD, null, "DEFAULT");
+                        if (transList.size() > i)
+                            tts.speak(transList.get(i), TextToSpeech.QUEUE_ADD, null, "DEFAULT");
                     }
                 }
         );
     }
 
-    class ItemViewHolder extends RecyclerView.ViewHolder{
+    class ItemViewHolder extends RecyclerView.ViewHolder {
         View itemView;
-        ImageView image;
-        TextView text;
+        TextView source, trans;
 
-        public ItemViewHolder(View itemView){
+        public ItemViewHolder(View itemView) {
             super(itemView);
 
             this.itemView = itemView;
-            image = (ImageView) itemView.findViewById(R.id.image);
-            text = (TextView) itemView.findViewById(R.id.text);
+            source = (TextView) itemView.findViewById(R.id.source);
+            trans = (TextView) itemView.findViewById(R.id.trans);
         }
     }
 }

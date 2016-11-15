@@ -96,6 +96,18 @@ public class HttpUtil {
         HttpRequest.get(Constant.URL_TRANSLATE,params,callback);
     }
 
+    public void translateReverse(List<String> source, BaseHttpRequestCallback callback){
+
+        for(int i = 0 ; i< source.size() ; i++){
+            params.addFormDataPart("q",source.get(i));
+        }
+
+        params.addFormDataPart("key", HttpUtil.GOOGLE_KEY);
+        params.addFormDataPart("source",LinkupApplication.getStringPref(UserUtil.LANGUAGE));
+        params.addFormDataPart("target", "en");
+        HttpRequest.get(Constant.URL_TRANSLATE,params,callback);
+    }
+
     public void post(String url, BaseHttpRequestCallback callback){
         HttpRequest.post(url,params,callback);
     }

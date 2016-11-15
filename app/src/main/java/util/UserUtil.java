@@ -4,7 +4,9 @@ import bean.UserBean;
 import service.LinkupApplication;
 
 /**
- * Created by Charlie on 2016/10/2 0002.
+ * Name: UserUtil
+ * Description: Save or get user from preference
+ * Created on 2016/10/2 0002.
  */
 
 public class UserUtil {

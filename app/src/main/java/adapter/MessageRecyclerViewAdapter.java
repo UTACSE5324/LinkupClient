@@ -61,6 +61,7 @@ public class MessageRecyclerViewAdapter extends RecyclerView.Adapter{
         return msgList.size();
     }
 
+    //judge the Message is from current user or friend and display different view
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i){
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -83,6 +84,7 @@ public class MessageRecyclerViewAdapter extends RecyclerView.Adapter{
             return ITEM;
     }
 
+    //full fill message to the view
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i){
         ItemViewHolder itemViewHolder = (ItemViewHolder) viewHolder;

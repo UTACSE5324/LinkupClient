@@ -12,7 +12,7 @@ android {
     defaultConfig {
         applicationId "set2.linkup"
         minSdkVersion 21
-        targetSdkVersion 25
+        targetSdkVersion 22
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -57,4 +57,3 @@ dependencies {
     //textRecognizer
     compile 'com.google.android.gms:play-services-vision:9.0.0'
 }
-apply plugin: 'com.google.gms.google-services'

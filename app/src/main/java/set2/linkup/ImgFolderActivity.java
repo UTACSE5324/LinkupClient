@@ -1,6 +1,7 @@
 package set2.linkup;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -24,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import adapter.SelectGridViewAdapter;
+import util.FileUtil;
 
 /**
  * Created by zhang on 2016/11/12 0012.
@@ -32,6 +35,8 @@ import adapter.SelectGridViewAdapter;
 public class ImgFolderActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private GridView gridview;
+
+    private Context context;
 
     private MaterialDialog loadingDialog, alertDialog;
 
@@ -46,10 +51,13 @@ public class ImgFolderActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_img_folder);
 
-        maxNum = getIntent().getIntExtra("max", 10);
+        maxNum = getIntent().getIntExtra("max", 1);
+        context = this;
 
         initViews();
+
         getImages();
+
     }
 
     public void initViews() {
@@ -97,12 +105,16 @@ public class ImgFolderActivity extends AppCompatActivity {
     }
 
     public void getImages() {
+
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             loadingDialog.show();
+
             new Thread(new Runnable() {
                 @Override
                 public void run() {
+
                     Uri mImageUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+
                     ContentResolver mContentResolver = ImgFolderActivity.this
                             .getContentResolver();
 
@@ -116,6 +128,7 @@ public class ImgFolderActivity extends AppCompatActivity {
                     while (mCursor.moveToNext()) {
                         String path = mCursor.getString(mCursor
                                 .getColumnIndex(MediaStore.Images.Media.DATA));
+
                         srcList.add(path);
                     }
 
@@ -130,6 +143,7 @@ public class ImgFolderActivity extends AppCompatActivity {
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
                 case 0:
+
                     loadingDialog.dismiss();
                     // 为View绑定数据
                     initData();

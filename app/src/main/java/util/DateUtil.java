@@ -4,7 +4,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Created by Charlie on 2016/10/2 0002.
+ * Name: DateUtil
+ * Description: Transfer the timestamp to Date String
+ * Created on 2016/10/2 0002.
  */
 
 public class DateUtil {

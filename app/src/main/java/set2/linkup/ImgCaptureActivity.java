@@ -27,7 +27,9 @@ import okhttp3.Headers;
 import okhttp3.Response;
 
 /**
- * Created by zhang on 2016/11/12 0012.
+ * Name: ImgCaptureActivity
+ * Description: Capture the text in Image and translate it
+ * Created on 2016/10/2 0002.
  */
 
 public class ImgCaptureActivity extends AppCompatActivity{
@@ -36,7 +38,9 @@ public class ImgCaptureActivity extends AppCompatActivity{
     private ImageView imageView;
     private TextView textView,transTextView;
 
+    //recognized text
     private List<String> source;
+    //translated text
     private String translated;
 
     private BaseHttpRequestCallback callback = new BaseHttpRequestCallback() {
