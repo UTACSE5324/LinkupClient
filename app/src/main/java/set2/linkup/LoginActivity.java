@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.FragmentActivity;
 
 import android.view.View;
@@ -16,12 +15,8 @@ import com.rengwuxian.materialedittext.MaterialEditText;
 
 import org.jivesoftware.smack.XMPPConnection;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-
 import bean.UserBean;
-import connect.XmppUtil;
+import service.XmppUtil;
 import service.LinkupApplication;
 import util.UserUtil;
 
@@ -73,9 +68,10 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
                        startActivity(intent);
                        finishAct();
                    }
-                   if(msg.arg1==-1)
-                       Toast.makeText(context,"Login fail",Toast.LENGTH_SHORT).show();
-                   break;
+                   if(msg.arg1==-1) {
+                       Toast.makeText(context, "Login fail", Toast.LENGTH_SHORT).show();
+                       XmppUtil.getInstance().getConnection().disconnect();
+                   }
                case LOGIN_AUTO:
                    if(msg.arg1==1) {
                        Toast.makeText(context, "Login success", Toast.LENGTH_SHORT).show();
@@ -84,8 +80,10 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
                        startActivity(intent);
                        finishAct();
                    }
-                   if(msg.arg1==-1)
-                       Toast.makeText(context,"Login fail",Toast.LENGTH_SHORT).show();
+                   if(msg.arg1==-1) {
+                       Toast.makeText(context, "Login fail", Toast.LENGTH_SHORT).show();
+                       XmppUtil.getInstance().getConnection().disconnect();
+                   }
                    break;
                case REGISTER:
                    if(msg.arg1==0)

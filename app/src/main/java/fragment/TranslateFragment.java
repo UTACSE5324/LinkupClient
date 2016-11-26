@@ -9,15 +9,10 @@ import android.speech.RecognizerIntent;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 
@@ -27,14 +22,13 @@ import java.util.List;
 import adapter.SpeechRecyclerViewAdapter;
 import bean.TranslateBean;
 import cn.finalteam.okhttpfinal.BaseHttpRequestCallback;
-import connect.HttpUtil;
+import service.HttpUtil;
 import ocr.OcrCaptureActivity;
 import okhttp3.Headers;
 import okhttp3.Response;
 import set2.linkup.R;
 
 import static android.app.Activity.RESULT_OK;
-import static service.LinkupApplication.context;
 
 /**
  * Name: TranslateFragment

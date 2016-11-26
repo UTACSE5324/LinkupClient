@@ -3,6 +3,7 @@ package fragment;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -13,7 +14,7 @@ import java.util.List;
 
 import adapter.FriendRecyclerViewAdapter;
 import bean.UserBean;
-import connect.XmppUtil;
+import service.XmppUtil;
 import service.LinkupApplication;
 import set2.linkup.R;
 import util.UserUtil;
@@ -33,12 +34,13 @@ public class FriendsFragment extends Fragment {
 
     private List<UserBean> friendsList;
 
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     private Handler handler = new Handler() {
         public void handleMessage(android.os.Message msg) {
             switch(msg.what){
                 case FRIENDS:
-                    if(msg.arg1==1){
+                    if(msg.obj != null){
                         friendsList = (List<UserBean>)msg.obj;
 
                         for(int i = 0 ; i<friendsList.size() ; i++){
@@ -51,6 +53,7 @@ public class FriendsFragment extends Fragment {
                     }
                     break;
             }
+            swipeRefreshLayout.setRefreshing(false);
         }};
 
     public static FriendsFragment newInstance(){
@@ -74,12 +77,27 @@ public class FriendsFragment extends Fragment {
         friendRecyclerViewAdapter = new FriendRecyclerViewAdapter(getContext());
         recyclerView.setAdapter(friendRecyclerViewAdapter);
 
+        swipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_refresh_layout);
+        swipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                initData();
+                            }
+                        }, 1000);
+                    }
+                }
+        );
+
         initData();
 
         return rootView;
     }
 
     public void initData(){
-        XmppUtil.getInstance().searchUsers(handler,FRIENDS,"a");
+        XmppUtil.getInstance().getAllFriends(handler,FRIENDS);
     }
 }

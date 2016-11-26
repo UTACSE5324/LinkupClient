@@ -21,7 +21,7 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 
 import adapter.SectionsPagerAdapter;
-import connect.XmppUtil;
+import service.XmppUtil;
 import service.LinkupApplication;
 import util.UserUtil;
 import view.CircleImageView;
@@ -114,7 +114,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_add_friend) {
+            Intent intent = new Intent(this, AddFriendActivity.class);
+            startActivity(intent);
             return true;
         }
 

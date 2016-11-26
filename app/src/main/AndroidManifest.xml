@@ -47,6 +47,13 @@
             android:screenOrientation="portrait" />
 
         <activity
+            android:name=".AddFriendActivity"
+            android:label="@string/app_name"
+            android:launchMode="standard"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:screenOrientation="portrait" />
+
+        <activity
             android:name=".MessageActivity"
             android:label="@string/app_name"
             android:launchMode="standard"

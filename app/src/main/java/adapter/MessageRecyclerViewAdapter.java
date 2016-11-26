@@ -15,7 +15,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import bean.MessageBean;
-import connect.XmppUtil;
+import service.XmppUtil;
 import set2.linkup.ImgCaptureActivity;
 import set2.linkup.R;
 import util.DateUtil;

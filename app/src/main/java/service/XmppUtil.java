@@ -1,9 +1,7 @@
-package connect;
+package service;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Base64;
@@ -12,6 +10,8 @@ import android.widget.ImageView;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.PacketCollector;
+import org.jivesoftware.smack.Roster;
+import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.SmackConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.filter.AndFilter;
@@ -52,21 +52,14 @@ import org.jivesoftware.smackx.search.UserSearch;
 import org.jivesoftware.smackx.search.UserSearchManager;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
 import bean.UserBean;
-import service.LinkupApplication;
 import set2.linkup.R;
-import util.FileUtil;
 import util.UserUtil;
-
-import static android.R.attr.data;
-import static org.jivesoftware.smackx.filetransfer.FileTransfer.Error.connection;
-import static org.jivesoftware.smackx.workgroup.packet.RoomTransfer.Type.user;
 
 /**
  * Name: XmppUtil
@@ -75,8 +68,8 @@ import static org.jivesoftware.smackx.workgroup.packet.RoomTransfer.Type.user;
  * Created on 2016/10/2 0002.
  */
 
-public class XmppUtil {
-    private static final String HOST = "172.20.10.4";
+public class XmppUtil{
+    private static final String HOST = "104.236.236.42";
     private static final int PORT = 5222;
     private static final String SERVER_NAME = "linkupserver";
     private static XmppUtil instance;
@@ -105,6 +98,7 @@ public class XmppUtil {
 
                 try {
                     if (conn.isConnected()) {
+                        ProviderManager.getInstance().addIQProvider("query","jabber:iq:search", new UserSearch.Provider());
 
                         List<UserBean> results = new ArrayList<>();
 
@@ -134,6 +128,93 @@ public class XmppUtil {
                     } else
                         msg.arg1 = -1;
 
+                } catch (Exception e) {
+                    msg.arg1 = -1;
+                }
+
+                handler.sendMessage(msg);
+            }
+        }).start();
+    }
+
+    public void addFriend(final Handler handler, final int what,final String userName,final String name) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (conn == null || !conn.isConnected())
+                    initConnection();
+                Message msg = new Message();
+                msg.what = what;
+
+                try {
+                    Roster roster = conn.getRoster();
+                    roster.createEntry(userName, name, null);
+
+                    msg.arg1 = 1;
+                } catch (Exception e) {
+                    msg.arg1 = -1;
+                }
+
+                handler.sendMessage(msg);
+            }
+        }).start();
+    }
+
+    public void getAllFriends(final Handler handler, final int what) {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (conn == null || !conn.isConnected())
+                    initConnection();
+                Message msg = new Message();
+                msg.what = what;
+
+                try {
+                    Roster roster = conn.getRoster();
+
+                    List<UserBean> Entrieslist = new ArrayList<>();
+                    Collection rosterEntry = roster.getEntries();
+                    Iterator i = rosterEntry.iterator();
+
+                    UserBean user;
+
+                    while (i.hasNext()) {
+                        RosterEntry re = (RosterEntry) i.next();
+                        user = new UserBean();
+                        user.setUsername(re.getUser());
+                        user.setEmail("");
+                        Entrieslist.add(user);
+
+                    }
+
+                    msg.obj = Entrieslist;
+                } catch (Exception e) {
+                    msg.obj = null;
+                }
+
+                handler.sendMessage(msg);
+            }
+        }).start();
+    }
+
+    public void removeFriend(final Handler handler, final int what, final String userName) {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (conn == null || !conn.isConnected())
+                    initConnection();
+                Message msg = new Message();
+                msg.what = what;
+
+                try {
+                    Roster roster = conn.getRoster();
+
+                    RosterEntry entry = roster.getEntry(userName);
+                    roster.removeEntry(entry);
+
+                    msg.arg1 = 1;
                 } catch (Exception e) {
                     msg.arg1 = -1;
                 }
@@ -262,7 +343,6 @@ public class XmppUtil {
             }
         }).start();
     }
-
 
     public void setAvatar(final Handler handler, final int what, final byte[] image) {
 

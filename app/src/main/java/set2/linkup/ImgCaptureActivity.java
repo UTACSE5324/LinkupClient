@@ -22,7 +22,7 @@ import java.util.List;
 
 import bean.TranslateBean;
 import cn.finalteam.okhttpfinal.BaseHttpRequestCallback;
-import connect.HttpUtil;
+import service.HttpUtil;
 import okhttp3.Headers;
 import okhttp3.Response;
 
