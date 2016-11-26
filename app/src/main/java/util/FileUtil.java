@@ -11,11 +11,14 @@ import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.DecimalFormat;
 
 /**
  * Name: FileUtil
@@ -37,6 +40,18 @@ public class FileUtil {
             }
         }
         return text;
+    }
+
+    public static void writeTextFile(File file, String str) throws IOException {
+        DataOutputStream out = null;
+        try {
+            out = new DataOutputStream(new FileOutputStream(file));
+            out.write(str.getBytes());
+        } finally {
+            if (out != null) {
+                out.close();
+            }
+        }
     }
 
     public static byte[] readTextFileToByte(File file) throws IOException {
@@ -126,6 +141,55 @@ public class FileUtil {
               }
 
           return null;
+    }
+
+    public static void deleteFile(File file) {
+
+        if (file.exists()) { // If file exists
+            if (file.isFile()) { // If file is a File
+                file.delete();
+            } else if (file.isDirectory()) { // or Directory
+                File files[] = file.listFiles(); // get all files in the Directory
+                for (int i = 0; i < files.length; i++) {
+                    deleteFile(files[i]); // delete all files
+                }
+            }
+            file.delete();
+        }
+    }
+
+    public static long getFileSize(File f) {
+        long size = 0;
+        File flist[] = f.listFiles();
+        for (int i = 0; i < flist.length; i++) {
+            if (flist[i].isDirectory()) {
+                size = size + getFileSize(flist[i]);
+            } else {
+                size = size + flist[i].length();
+            }
+        }
+        return size;
+    }
+
+    public static String getFileSizeString(File f) {// 转换文件大小
+        String fileSizeString = "";
+        if(f.exists()) {
+            long fileS = getFileSize(f);
+
+            DecimalFormat df = new DecimalFormat("#.00");
+            if (fileS < 1024) {
+                fileSizeString = df.format((double) fileS) + "B";
+            } else if (fileS < 1048576) {
+                fileSizeString = df.format((double) fileS / 1024) + "K";
+            } else if (fileS < 1073741824) {
+                fileSizeString = df.format((double) fileS / 1048576) + "M";
+            } else {
+                fileSizeString = df.format((double) fileS / 1073741824) + "G";
+            }
+        }
+        else
+            fileSizeString = "0B";
+        return fileSizeString;
     }
 
     /**

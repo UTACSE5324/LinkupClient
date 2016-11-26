@@ -8,6 +8,8 @@ import android.util.Base64;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.alibaba.fastjson.JSON;
+
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.PacketCollector;
 import org.jivesoftware.smack.Roster;
@@ -25,6 +27,7 @@ import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.Form;
 import org.jivesoftware.smackx.GroupChatInvitation;
+import org.jivesoftware.smackx.OfflineMessageManager;
 import org.jivesoftware.smackx.PrivateDataManager;
 import org.jivesoftware.smackx.ReportedData;
 import org.jivesoftware.smackx.bytestreams.socks5.provider.BytestreamsProvider;
@@ -54,11 +57,16 @@ import org.jivesoftware.smackx.search.UserSearchManager;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import bean.MessageBean;
 import bean.UserBean;
 import set2.linkup.R;
+import util.CacheUtil;
 import util.UserUtil;
 
 /**
@@ -424,7 +432,7 @@ public class XmppUtil{
             config.setDebuggerEnabled(true);
 
             config.setReconnectionAllowed(true);
-            config.setSendPresence(true);
+            config.setSendPresence(false);
 
             config.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
 
@@ -440,6 +448,49 @@ public class XmppUtil{
             }
         }
         return isConnect;
+    }
+
+    public void getOfflineMessage(final Handler handler, final int what){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (conn == null || !conn.isConnected())
+                    initConnection();
+
+                Message msg = new Message();
+                msg.what = what;
+
+                OfflineMessageManager offlineManager = new OfflineMessageManager(conn);
+                List<MessageBean> msgList = new ArrayList<>();
+
+                try {
+                    Iterator<org.jivesoftware.smack.packet.Message> it = offlineManager
+                            .getMessages();
+
+                    Map<String, ArrayList<Message>> offlineMsgs = new HashMap<String, ArrayList<Message>>();
+
+                    while (it.hasNext()) {
+                        org.jivesoftware.smack.packet.Message message = it.next();
+                        String fromUser = message.getFrom().split("@")[0];
+
+                        MessageBean bean = new MessageBean();
+                        bean.setUser(fromUser);
+                        bean.setMessage(message.getBody());
+                        bean.setDateline(System.currentTimeMillis());
+
+                        msgList.add(bean);
+                    }
+
+                    msg.obj = msgList;
+
+                    offlineManager.deleteMessages();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                handler.sendMessage(msg);
+            }
+        }).start();
     }
 
     public void configureProviderManager(ProviderManager pm) {

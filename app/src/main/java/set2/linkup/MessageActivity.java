@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManager;
@@ -40,6 +41,7 @@ import service.XmppUtil;
 import okhttp3.Headers;
 import okhttp3.Response;
 import service.LinkupApplication;
+import util.CacheUtil;
 import util.UserUtil;
 
 import static service.LinkupApplication.context;
@@ -62,7 +64,7 @@ public class MessageActivity extends AppCompatActivity {
     /*show this dialog when waiting for response of the Translate API*/
     private ProgressDialog progressDialog;
 
-    private List<MessageBean> msgList;
+    private static List<MessageBean> msgList;
     private MessageRecyclerViewAdapter adapter;
 
     private boolean showTranslate;
@@ -96,6 +98,9 @@ public class MessageActivity extends AppCompatActivity {
 
     private Handler handler = new Handler() {
         public void handleMessage(android.os.Message msg) {
+            String data = JSON.toJSON(msgList).toString();
+            CacheUtil.setConversationCache(data, uName);
+
             adapter.notifyItemRangeInserted(msgList.size(), 1);
             recyclerView.scrollToPosition(recyclerView.getChildCount());
         }
@@ -205,6 +210,35 @@ public class MessageActivity extends AppCompatActivity {
                 }
             }
         });
+
+        String json = CacheUtil.getConversationCache(uName);
+        List<MessageBean> list = new ArrayList<>();
+
+        if (json != null) {
+            list = JSON.parseArray(json, MessageBean.class);
+
+            msgList.addAll(list);
+        }
+
+        try {
+            ArrayList<MessageBean> offlineMsg = (ArrayList<MessageBean>) getIntent().getExtras().getSerializable("offline");
+            msgList.addAll(offlineMsg);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (msgList != null) {
+            adapter.notifyDataSetChanged();
+            recyclerView.scrollToPosition(recyclerView.getChildCount());
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    String data = JSON.toJSON(msgList).toString();
+                    CacheUtil.setConversationCache(data, uName);
+                }
+            }).start();
+        }
     }
 
     @Override

@@ -23,6 +23,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import adapter.SectionsPagerAdapter;
 import service.XmppUtil;
 import service.LinkupApplication;
+import util.CacheUtil;
 import util.UserUtil;
 import view.CircleImageView;
 
@@ -191,7 +192,10 @@ public class MainActivity extends AppCompatActivity
             XmppUtil.getInstance().getConnection().disconnect();
         }
 
+
+        CacheUtil.clearCache();
         UserUtil.saveUserInfo(null);
+
         Intent intent = new Intent(context, LoginActivity.class);
         startActivity(intent);
         finish();

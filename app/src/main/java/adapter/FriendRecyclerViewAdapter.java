@@ -2,6 +2,7 @@ package adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -19,6 +20,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import java.util.ArrayList;
 import java.util.List;
 
+import bean.MessageBean;
 import bean.UserBean;
 import service.XmppUtil;
 import set2.linkup.MessageActivity;
@@ -34,6 +36,7 @@ public class FriendRecyclerViewAdapter extends RecyclerView.Adapter{
     private Context context;
 
     private List<UserBean> userList;
+    private List<MessageBean> msgList;
 
     private Handler handler = new Handler() {
         public void handleMessage(android.os.Message msg) {
@@ -50,12 +53,15 @@ public class FriendRecyclerViewAdapter extends RecyclerView.Adapter{
     public FriendRecyclerViewAdapter(Context context){
         this.context = context;
         this.userList = new ArrayList<>();
+        this.msgList = new ArrayList<>();
     }
 
     //Get user list
     public void setUserList(List<UserBean> userList){
         this.userList = userList;
     }
+
+    public void setMsgList(List<MessageBean> msgList){ this.msgList = msgList; }
 
     @Override
     public int getItemCount(){
@@ -81,7 +87,6 @@ public class FriendRecyclerViewAdapter extends RecyclerView.Adapter{
         ItemViewHolder itemViewHolder = (ItemViewHolder) viewHolder;
 
         String uname = userList.get(i).getUsername();
-        String email = userList.get(i).getEmail();
 
         itemViewHolder.uname = uname;
 
@@ -89,12 +94,32 @@ public class FriendRecyclerViewAdapter extends RecyclerView.Adapter{
         XmppUtil.getInstance().getAvatar(itemViewHolder.avatar, uname);
 
         itemViewHolder.tvTitle.setText(uname);
-        itemViewHolder.tvContent.setText(email);
+
+        int count = 0;
+        String msg = "";
+
+        ArrayList<MessageBean> list = new ArrayList<>();
+
+        for(int j = 0; j < msgList.size() ; j++){
+            if(msgList.get(j).getUser().equals(uname)){
+                count++;
+                msg = msgList.get(j).getMessage();
+                list.add(msgList.get(j));
+            }
+        }
+
+        itemViewHolder.list = list;
+
+        if(count > 0 && msg.length() > 0) {
+            itemViewHolder.tvContent.setText("[" + count + "] " + msg);
+        }
     }
 
     //ViewHolder for recycle view
     class ItemViewHolder extends RecyclerView.ViewHolder{
         String uname;
+        ArrayList<MessageBean> list;
+
         ImageView avatar;
         TextView tvTitle,tvContent;
 
@@ -111,7 +136,15 @@ public class FriendRecyclerViewAdapter extends RecyclerView.Adapter{
                         public void onClick(View view) {
                             Intent intent = new Intent(context, MessageActivity.class);
                             intent.putExtra("uname", uname );
+
+                            Bundle bundle = new Bundle();
+                            bundle.putSerializable("offline",list);
+                            intent.putExtras(bundle);
                             context.startActivity(intent);
+
+                            msgList.removeAll(list);
+                            list.clear();
+                            tvContent.setText("");
                         }
                     }
             );

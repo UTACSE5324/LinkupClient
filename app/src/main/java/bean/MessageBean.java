@@ -2,6 +2,8 @@ package bean;
 
 import android.graphics.Bitmap;
 
+import java.io.Serializable;
+
 /**
  * Name: MessageBean
  * Description: Bean for the message received
@@ -19,7 +21,7 @@ import android.graphics.Bitmap;
  * Created on 2016/10/2 0002.
  */
 
-public class MessageBean {
+public class MessageBean implements Serializable{
     String user;
     String message;
     String translate;

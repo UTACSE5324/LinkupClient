@@ -12,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,6 +24,7 @@ import java.io.FileInputStream;
 import java.util.List;
 
 import service.XmppUtil;
+import util.CacheUtil;
 
 /**
  * Created by zhang on 2016/10/30 0030.
@@ -78,11 +80,14 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     public void initViews() {
-        TextView tvAvatar = (TextView) findViewById(R.id.tv_avatar);
-        tvAvatar.setOnClickListener(this);
+        LinearLayout btnClearCache = (LinearLayout) findViewById(R.id.clearcache);
+        btnClearCache.setOnClickListener(this);
 
-        TextView tvPassword = (TextView) findViewById(R.id.tv_password);
-        tvPassword.setOnClickListener(this);
+        LinearLayout btnAvatar = (LinearLayout) findViewById(R.id.changeavatar);
+        btnAvatar.setOnClickListener(this);
+
+        LinearLayout btnPassword = (LinearLayout) findViewById(R.id.changepwd);
+        btnPassword.setOnClickListener(this);
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Loading");
@@ -129,13 +134,16 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
     public void onClick(View v) {
 
         switch (v.getId()) {
-            case R.id.tv_avatar:
+            case R.id.changeavatar:
                 Intent intent = new Intent(this,ImgFolderActivity.class);
                 intent.putExtra("max",1);
                 startActivityForResult(intent,CAMERA_SELECT);
                 break;
-            case R.id.tv_password:
+            case R.id.changepwd:
                 changePwdDialog.show();
+                break;
+            case R.id.clearcache:
+                Toast.makeText(context,"Clear cache " + CacheUtil.clearCache(), Toast.LENGTH_SHORT).show();
                 break;
         }
     }
