@@ -18,6 +18,7 @@ import bean.MessageBean;
 import bean.UserBean;
 import service.XmppUtil;
 import service.LinkupApplication;
+import set2.linkup.MainActivity;
 import set2.linkup.R;
 import util.UserUtil;
 
@@ -30,49 +31,37 @@ import util.UserUtil;
 public class FriendsFragment extends Fragment {
     private static final String ARG_SECTION = "Friends";
     private static final int FRIENDS = 1;
-    private static final int MESSAGE = 2;
-
-    private ProgressDialog loadingDialog;
 
     private RecyclerView recyclerView;
     private FriendRecyclerViewAdapter friendRecyclerViewAdapter;
 
     private List<UserBean> friendsList;
-    private List<MessageBean> offlineMsg;
 
     private SwipeRefreshLayout swipeRefreshLayout;
 
-    private boolean getFriends,getMsg;
-
     private Handler handler = new Handler() {
         public void handleMessage(android.os.Message msg) {
-            switch(msg.what){
+            switch (msg.what) {
                 case FRIENDS:
-                    getFriends = true;
-                    if(msg.obj != null){
-                        friendsList = (List<UserBean>)msg.obj;
+                    if (msg.obj != null) {
+                        friendsList = (List<UserBean>) msg.obj;
 
-                        for(int i = 0 ; i<friendsList.size() ; i++){
-                            if(friendsList.get(i).getUsername().equals(LinkupApplication.getStringPref(UserUtil.UNAME)))
+                        for (int i = 0; i < friendsList.size(); i++) {
+                            if (friendsList.get(i).getUsername().equals(LinkupApplication.getStringPref(UserUtil.UNAME)))
                                 friendsList.remove(i);
                         }
 
                         friendRecyclerViewAdapter.setUserList(friendsList);
                     }
                     break;
-                case MESSAGE:
-                    getMsg = true;
-                    if(msg.obj !=null){
-                        offlineMsg =  (List<MessageBean>)msg.obj;
-                        friendRecyclerViewAdapter.setMsgList(offlineMsg);
-                    }
-                    break;
             }
 
-            refreshList();
-        }};
+            swipeRefreshLayout.setRefreshing(false);
+            friendRecyclerViewAdapter.notifyDataSetChanged();
+        }
+    };
 
-    public static FriendsFragment newInstance(){
+    public static FriendsFragment newInstance() {
         FriendsFragment fragment = new FriendsFragment();
         Bundle args = new Bundle();
         args.putString("type", ARG_SECTION);
@@ -85,16 +74,22 @@ public class FriendsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_friends, container, false);
 
-        loadingDialog = new ProgressDialog(getContext());
-        loadingDialog.setMessage("Loading");
-        loadingDialog.show();
-
         recyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
 
         friendRecyclerViewAdapter = new FriendRecyclerViewAdapter(getContext());
+
+
+        try {
+            List<MessageBean> offlineMsg = ((MainActivity) getActivity()).getOfflineMsg();
+            if (offlineMsg != null)
+                friendRecyclerViewAdapter.setMsgList(offlineMsg);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         recyclerView.setAdapter(friendRecyclerViewAdapter);
 
         swipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_refresh_layout);
@@ -105,8 +100,6 @@ public class FriendsFragment extends Fragment {
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                getFriends = false;
-                                getMsg = false;
                                 initData();
                             }
                         }, 1000);
@@ -114,25 +107,13 @@ public class FriendsFragment extends Fragment {
                 }
         );
 
-        getFriends = false;
-        getMsg = false;
-
         initData();
 
         return rootView;
     }
 
-    public void initData(){
-        XmppUtil.getInstance().getAllFriends(handler,FRIENDS);
-
-        XmppUtil.getInstance().getOfflineMessage(handler,MESSAGE);
+    public void initData() {
+        XmppUtil.getInstance().getAllFriends(handler, FRIENDS);
     }
 
-    public void refreshList(){
-        if(getFriends && getMsg) {
-            loadingDialog.dismiss();
-            swipeRefreshLayout.setRefreshing(false);
-            friendRecyclerViewAdapter.notifyDataSetChanged();
-        }
-    }
 }

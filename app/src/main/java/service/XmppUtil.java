@@ -100,7 +100,7 @@ public class XmppUtil{
             @Override
             public void run() {
                 if (conn == null || !conn.isConnected())
-                    initConnection();
+                    initConnection(true);
                 Message msg = new Message();
                 msg.what = what;
 
@@ -150,7 +150,7 @@ public class XmppUtil{
             @Override
             public void run() {
                 if (conn == null || !conn.isConnected())
-                    initConnection();
+                    initConnection(true);
                 Message msg = new Message();
                 msg.what = what;
 
@@ -174,7 +174,7 @@ public class XmppUtil{
             @Override
             public void run() {
                 if (conn == null || !conn.isConnected())
-                    initConnection();
+                    initConnection(true);
                 Message msg = new Message();
                 msg.what = what;
 
@@ -212,7 +212,7 @@ public class XmppUtil{
             @Override
             public void run() {
                 if (conn == null || !conn.isConnected())
-                    initConnection();
+                    initConnection(true);
                 Message msg = new Message();
                 msg.what = what;
 
@@ -236,10 +236,42 @@ public class XmppUtil{
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if (conn == null || !conn.isConnected())
-                    initConnection();
+                initConnection(false);
+
                 Message msg = new Message();
                 msg.what = what;
+
+                try {
+                    conn.login(uname, pword);
+                    OfflineMessageManager offlineManager = new OfflineMessageManager(conn);
+                    ArrayList<MessageBean> msgList = new ArrayList<>();
+
+                    Iterator<org.jivesoftware.smack.packet.Message> it = offlineManager
+                            .getMessages();
+
+                    Map<String, ArrayList<Message>> offlineMsgs = new HashMap<String, ArrayList<Message>>();
+
+                    while (it.hasNext()) {
+                        org.jivesoftware.smack.packet.Message message = it.next();
+                        String fromUser = message.getFrom().split("@")[0];
+
+                        MessageBean bean = new MessageBean();
+                        bean.setUser(fromUser);
+                        bean.setMessage(message.getBody());
+                        bean.setDateline(System.currentTimeMillis());
+
+                        msgList.add(bean);
+                    }
+
+                    msg.obj = msgList;
+
+                    offlineManager.deleteMessages();
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+
+                conn.disconnect();
+                initConnection(true);
 
                 try {
                     if (conn.isConnected()) {
@@ -262,7 +294,7 @@ public class XmppUtil{
             @Override
             public void run() {
                 if (conn == null || !conn.isConnected())
-                    initConnection();
+                    initConnection(true);
 
                 Message msg = new Message();
                 msg.what = what;
@@ -323,7 +355,7 @@ public class XmppUtil{
             @Override
             public void run() {
                 if (conn == null || !conn.isConnected())
-                    initConnection();
+                    initConnection(true);
 
                 ByteArrayInputStream bais = null;
                 try {
@@ -363,7 +395,7 @@ public class XmppUtil{
                 try {
 
                     if (conn == null || !conn.isConnected())
-                        initConnection();
+                        initConnection(true);
 
                     VCard card = new VCard();
                     card.setFirstName(LinkupApplication.getStringPref(UserUtil.UNAME));
@@ -402,7 +434,7 @@ public class XmppUtil{
             @Override
             public void run() {
                 if (conn == null || !conn.isConnected())
-                    initConnection();
+                    initConnection(true);
 
                 Message msg = new Message();
                 msg.what = what;
@@ -424,7 +456,7 @@ public class XmppUtil{
     }
 
     /*new the Connection method*/
-    public boolean initConnection() {
+    public boolean initConnection(boolean sendPresence) {
         boolean isConnect = false;
         if (conn == null || !conn.isConnected()) {
             ConnectionConfiguration config = new ConnectionConfiguration(HOST, PORT, SERVER_NAME);
@@ -432,7 +464,7 @@ public class XmppUtil{
             config.setDebuggerEnabled(true);
 
             config.setReconnectionAllowed(true);
-            config.setSendPresence(false);
+            config.setSendPresence(sendPresence);
 
             config.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
 
@@ -450,48 +482,6 @@ public class XmppUtil{
         return isConnect;
     }
 
-    public void getOfflineMessage(final Handler handler, final int what){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (conn == null || !conn.isConnected())
-                    initConnection();
-
-                Message msg = new Message();
-                msg.what = what;
-
-                OfflineMessageManager offlineManager = new OfflineMessageManager(conn);
-                List<MessageBean> msgList = new ArrayList<>();
-
-                try {
-                    Iterator<org.jivesoftware.smack.packet.Message> it = offlineManager
-                            .getMessages();
-
-                    Map<String, ArrayList<Message>> offlineMsgs = new HashMap<String, ArrayList<Message>>();
-
-                    while (it.hasNext()) {
-                        org.jivesoftware.smack.packet.Message message = it.next();
-                        String fromUser = message.getFrom().split("@")[0];
-
-                        MessageBean bean = new MessageBean();
-                        bean.setUser(fromUser);
-                        bean.setMessage(message.getBody());
-                        bean.setDateline(System.currentTimeMillis());
-
-                        msgList.add(bean);
-                    }
-
-                    msg.obj = msgList;
-
-                    offlineManager.deleteMessages();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                handler.sendMessage(msg);
-            }
-        }).start();
-    }
 
     public void configureProviderManager(ProviderManager pm) {
         // Private Data Storage

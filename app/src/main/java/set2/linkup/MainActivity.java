@@ -20,7 +20,10 @@ import android.widget.TextView;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 
+import java.util.ArrayList;
+
 import adapter.SectionsPagerAdapter;
+import bean.MessageBean;
 import service.XmppUtil;
 import service.LinkupApplication;
 import util.CacheUtil;
@@ -39,12 +42,23 @@ public class MainActivity extends AppCompatActivity
     private NavigationView navigationView;
     private Context context;
 
+    private ArrayList<MessageBean> msgList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         context = MainActivity.this;
+
+        try {
+            msgList = (ArrayList<MessageBean>) getIntent().getExtras().getSerializable("offline");
+
+            System.out.println(">>>> " + msgList.size());
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
         initViews();
         setAccount();
@@ -90,6 +104,10 @@ public class MainActivity extends AppCompatActivity
         userName.setText(un);
         language.setText("preferred language : "+la);
         email.setText(em);
+    }
+
+    public ArrayList<MessageBean> getOfflineMsg(){
+        return msgList;
     }
 
     @Override

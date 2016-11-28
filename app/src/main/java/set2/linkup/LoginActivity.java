@@ -15,6 +15,10 @@ import com.rengwuxian.materialedittext.MaterialEditText;
 
 import org.jivesoftware.smack.XMPPConnection;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import bean.MessageBean;
 import bean.UserBean;
 import service.XmppUtil;
 import service.LinkupApplication;
@@ -64,7 +68,14 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
 
                        UserUtil.saveUserInfo(bean);
 
+                       ArrayList<MessageBean> msgList = (ArrayList<MessageBean>) msg.obj;
+
                        Intent intent = new Intent(context, MainActivity.class);
+
+                       Bundle bundle = new Bundle();
+                       bundle.putSerializable("offline", msgList);
+                       intent.putExtras(bundle);
+
                        startActivity(intent);
                        finishAct();
                    }
@@ -76,7 +87,14 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
                    if(msg.arg1==1) {
                        Toast.makeText(context, "Login success", Toast.LENGTH_SHORT).show();
 
+                       ArrayList<MessageBean> msgList = (ArrayList<MessageBean>) msg.obj;
+
                        Intent intent = new Intent(context, MainActivity.class);
+
+                       Bundle bundle = new Bundle();
+                       bundle.putSerializable("offline", msgList);
+                       intent.putExtras(bundle);
+
                        startActivity(intent);
                        finishAct();
                    }
